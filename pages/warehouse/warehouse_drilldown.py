@@ -142,8 +142,7 @@ def update_line_chart(factory_name, product_name, list_year, time_groupby):
         sales_fig_stack = px.line(df_sales_stack,
                               x=time_groupby,
                               y='sales_quantity',
-                              color="year",
-                              symbol="year")
+                              color="year")
     else:
         sales_fig_stack = px.line(df_sales_stack,
                                 x=time_groupby,
@@ -169,7 +168,9 @@ def update_line_chart(factory_name, product_name, list_year, time_groupby):
                         'day_of_year': '一年中的某一天 - Ngày trong năm'}
     sales_fig_stack.update_layout(
     xaxis=dict(title=x_axis_title_map[time_groupby]),
-    yaxis=dict(title="數量 - Số lượng"),
+    yaxis=dict(title="數量 - Số lượng",
+                tickformat=',.0f')
+
     )
     
     # #Concat

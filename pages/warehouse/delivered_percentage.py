@@ -145,7 +145,10 @@ def update_bar_plan(slicer, factory_name):
         ),
         title_x=0.5,
         barmode='group',  # Group the bars side by side
-
+        yaxis=dict(
+            tickformat=',.0f'  # This removes the comma from the numbers
+            ),
+        height=500
     )
 
     fig.update_xaxes(

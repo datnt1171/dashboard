@@ -37,20 +37,20 @@ layout = dbc.Container([
         dbc.Col([
             html.Title("Select Group Level"),
             dbc.RadioItems(
-            id="radios_paint_type",
-            className="btn-group",
-            inputClassName="btn-check",
-            labelClassName="btn btn-outline-primary",
-            labelCheckedClassName="active",
-            options=[
-                {"label": "Paint System", "value": "paint_type"},
-                {"label": "Category", "value": "category"},
-                {"label": "Sub Category", "value": "sub_category_1"},
-                {"label": "Sub Category 2", "value": "sub_category_2"}
-                
-            ],
-            value="paint_type",
-        )
+                    id="radios_paint_type",
+                    className="btn-group",
+                    inputClassName="btn-check",
+                    labelClassName="btn btn-outline-primary",
+                    labelCheckedClassName="active",
+                    options=[
+                        {"label": "Paint System", "value": "paint_type"},
+                        {"label": "Category", "value": "category"},
+                        {"label": "Sub Category", "value": "sub_category_1"},
+                        {"label": "Sub Category 2", "value": "sub_category_2"}
+                        
+                    ],
+                    value="paint_type",
+                )
             ])
     ]),
 
@@ -103,32 +103,32 @@ def update_content(start_date, end_date, radios_value):
     dff_actual.sort_values(radios_value, inplace=True)
     dff_actual['estimated_quantity'] = dff_actual['estimated_quantity'].round(0)
     fig_actual = px.bar(
-    dff_actual,
-    x=radios_value,
-    y='estimated_quantity',
-    color=radios_value,
-    color_discrete_map={
-        "SG": "yellow",  # Map "SG" to yellow
-        "SH": "green",
-        "Silver": "gray"   # Map "SH" to green
-    }, text_auto=True,
-    height=600
-)
+        dff_actual,
+        x=radios_value,
+        y='estimated_quantity',
+        color=radios_value,
+        color_discrete_map={
+            "SG": "yellow",  # Map "SG" to yellow
+            "SH": "green",
+            "Silver": "gray"   # Map "SH" to green
+        }, text_auto=True,
+        height=600
+    )
 
     fig_actual.update_traces(textposition='outside', textfont_size=14, textangle=0)
     fig_actual.update_layout(
-    xaxis_title="油漆類型",
-    yaxis_title="數量",
-    yaxis=dict(
-        tickformat=':,.0f'  # This removes the comma from the numbers
-    ),
-    title={
-        'text': f"{start_date} 到 {end_date}",
-        'x': 0.5,  # Position it in the center
-        'xanchor': 'center',
-        'yanchor': 'top'
-    }
-)
+        xaxis_title="油漆類型",
+        yaxis_title="數量",
+        yaxis=dict(
+            tickformat=',.0f'  # This removes the comma from the numbers
+            ),
+        title={
+            'text': f"{start_date} 到 {end_date}",
+            'x': 0.5,  # Position it in the center
+            'xanchor': 'center',
+            'yanchor': 'top'
+        }
+    )
     
     # Create bar chart for number of batch
     dff_num_batch = dff.groupby(radios_value).agg({'estimated_quantity':'count'}).reset_index()

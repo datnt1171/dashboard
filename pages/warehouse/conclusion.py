@@ -222,7 +222,8 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
     # Update layout for better readability
     fig.update_layout(
         xaxis=dict(title="月 - Tháng"),
-        yaxis=dict(title="數量 - Số lượng"),
+        yaxis=dict(title="數量 - Số lượng",
+                   tickformat=',.0f'),
         barmode="stack",
         legend=dict(title=""),
         template="plotly_white",
