@@ -70,10 +70,10 @@ layout = dbc.Container([
                 dcc.Dropdown(
                     id="dropdown_groupby",
                     options=[
-                        {"label": "Quarter", "value": "quarter"},
-                        {"label": "Month", "value": "month"},
-                        {"label": "Week", "value": "week_of_year"},
-                        {"label": "Day", "value": "day_of_year"},
+                        {"label": "四分之一 Quý", "value": "quarter"},
+                        {"label": "月 Tháng", "value": "month"},
+                        {"label": "星期 Tuần", "value": "week_of_year"},
+                        {"label": "天 Ngày", "value": "day_of_year"},
                     ],
                     value="month",
                     clearable=False
@@ -169,7 +169,8 @@ def update_line_chart(factory_name, product_name, list_year, time_groupby):
     sales_fig_stack.update_layout(
     xaxis=dict(title=x_axis_title_map[time_groupby]),
     yaxis=dict(title="數量 - Số lượng",
-                tickformat=',.0f')
+                tickformat=',.0f'),
+    legend=dict(title="年 Năm")
 
     )
     

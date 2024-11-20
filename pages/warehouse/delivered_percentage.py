@@ -3,7 +3,6 @@ from dash import html, dcc, callback, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import pandas as pd
-import psycopg2
 from datetime import datetime
 
 from extract import get_factory_list, get_overall_sales, get_overall_planned
@@ -14,11 +13,10 @@ factory_list = get_factory_list()
 layout = dbc.Container([
 
     dbc.Row([
+
         dbc.Col([
-            html.H6("選擇日期範圍 - Chọn khoảng thời gian"),
-            # Add DatePickerRange
-            dcc.RangeSlider(1, 31, 1, value=[1, 31], id='day_slicer_plan'),
-        ],width=6),
+            html.H1('計劃及實際銷售 - Dự định GH và GH thực tế', style={'text-align':'center'})
+        ]),
 
         dbc.Col([
             html.H6("選擇客戶 - Chọn KH"),
@@ -26,14 +24,8 @@ layout = dbc.Container([
                          options=factory_list['factory_name'], 
                          value='大森 TIM BER',
                          clearable=False,)
-        ], width=3)
-    ]),
-
-    dbc.Row([
-        dbc.Col([
-            html.H1('計劃及實際銷售 - Dự định GH và GH thực tế')
-        ], align='center')
-    ]),
+        ], width=2)
+    ],style={'padding-top':'5px'}),
 
     dbc.Row([
         dbc.Col([
@@ -45,28 +37,19 @@ layout = dbc.Container([
 
 @callback(
     [Output('bar_plan', 'figure'),],
-    [Input('day_slicer_plan','value'),
-     Input('factory_dropdown_plan', 'value')]
+    [Input('factory_dropdown_plan', 'value')]
 )
 
-def update_bar_plan(slicer, factory_name):
+def update_bar_plan(factory_name):
 
     # Get sales
     df_sales = get_overall_sales(datetime.today().date().year)
     # Get planned deliveries
     df_plan = get_overall_planned(datetime.today().date().year)
 
-
     # Preprocessing
-    ## Filter using DatePickerRange
     df_sales['sales_date'] = pd.to_datetime(df_sales['sales_date'])
     df_plan['estimated_delivery_date'] = pd.to_datetime(df_plan['estimated_delivery_date'])
-
-    df_sales = df_sales[(df_sales['sales_date'].dt.day >= slicer[0]) &
-                        (df_sales['sales_date'].dt.day <= slicer[1])]
-    df_plan = df_plan[(df_plan['estimated_delivery_date'].dt.day >= slicer[0]) &
-                        (df_plan['estimated_delivery_date'].dt.day <= slicer[1])]
-
 
     ## Join with factory_name to filter
     df_sales = df_sales.merge(factory_list, on='factory_code', how='left')
@@ -120,7 +103,7 @@ def update_bar_plan(slicer, factory_name):
         yaxis='y2',
         mode='lines+markers+text',
         marker=dict(color='red', size=10),
-        line=dict(dash='dash', color='red'),
+        line=dict(color='red'),
         text=[f'{p:.1f}%' for p in df['percentage']],  # Display as percentage with 1 decimal
         textposition='middle right',
         textfont=dict(

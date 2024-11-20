@@ -59,7 +59,7 @@ layout = dbc.Container([
         dbc.Col([
             dbc.Row([
                 dbc.Col([
-                    html.H4("数量差异 SỐ LƯỢNG CHÊNH LỆCH"),
+                    html.H5("数量差异 SỐ LƯỢNG CHÊNH LỆCH", style={'text-align':'center'}),
                 ])
             ]),
 
@@ -254,11 +254,25 @@ def update_chart(start_date, end_date, start_date_target, end_date_target, activ
     start_date_target = datetime.strptime(start_date_target, '%Y-%m-%d')
     end_date_target = datetime.strptime(end_date_target, '%Y-%m-%d')
 
-    # Fig increase
-    df_filter, df = get_mtd_product(start_date, end_date, start_date_target, end_date_target, factory_name)
-    df_increase = df_filter[df_filter['quantity_diff']>0]
-    df_decrease = df_filter[df_filter['quantity_diff']<0]
 
+    df = get_mtd_product(start_date, end_date, start_date_target, end_date_target, factory_name)
+
+    df['quantity_diff'] = df['total_quantity'] - df['total_quantity_prev']
+
+    df.sort_values(by='quantity_diff', ascending=False, inplace=True)
+
+    df_increase = df[df['quantity_diff']>0]
+    df_increase = df_increase.head(5)
+
+    df_decrease = df[df['quantity_diff']<0]
+    df_decrease.sort_values(by='quantity_diff', ascending=True, inplace=True)
+    df_decrease = df_decrease.head(5)
+
+    df_sales_all = get_sales_all(start_date, end_date, factory_name)
+    df_sales_all.sort_values('sales_quantity', inplace=True, ascending=True)
+    df_sales_all = df_sales_all.tail(10)
+
+    # Plot
     fig_increase = px.bar(df_increase, x='product_name', y='quantity_diff', text_auto=True)
     fig_increase.update_traces(marker_color='#339966', textposition='outside')
     max_y = df_increase['quantity_diff'].max() * 1.2  # Increase by 20%
@@ -285,14 +299,6 @@ def update_chart(start_date, end_date, start_date_target, end_date_target, activ
                                 )
 
 
-
-    df_sales_all = get_sales_all(start_date, end_date, factory_name)
-    df_sales_all.sort_values('sales_quantity', inplace=True, ascending=True)
-    df_sales_all['percentage'] = df_sales_all['sales_quantity'] / df_sales_all['sales_quantity'].sum()
-    df_sales_all['cumsum'] = df_sales_all['percentage'].cumsum()
-
-    df_sales_all = df_sales_all[df_sales_all['cumsum']>=0.1]
-
     fig_sales_all = px.bar(df_sales_all, y='product_name', x='sales_quantity', text_auto=True, orientation='h')
     fig_sales_all.update_traces(textposition='outside')
     max_x_all = df_sales_all['sales_quantity'].max() * 1.1  # Increase by 10%
@@ -306,68 +312,17 @@ def update_chart(start_date, end_date, start_date_target, end_date_target, activ
                                 )
 
     df = df[['product_name','total_quantity','total_quantity_prev','quantity_diff']]
-    df.sort_values(by='quantity_diff', ascending=False, inplace=True)
-
-
     new_column_names = {
         'product_name': f'產品名稱 - Tên SP',
         'total_quantity': f'{start_date.date()} 天到 {end_date.date()} 天的銷售額 - Bán hàng từ {start_date.date()} đến {end_date.date()}',
         'total_quantity_prev': f'{start_date_target.date()} 天到 {end_date_target.date()} 天的銷售額 - Bán hàng từ {start_date_target.date()} đến {end_date_target.date()}',
         'quantity_diff': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
     }
-
     df = df.rename(columns=new_column_names)
+
     warehouse_factory_title = f'{factory_name}'
+
     return [fig_increase, fig_decrease, fig_sales_all, df.to_dict('records'), warehouse_factory_title]
-
-
-
-# @callback(Output('mom_table','data'),
-#          [Input('factory_day_range', 'start_date'),
-#           Input('factory_day_range', 'end_date'),
-#           Input('mdt_table_increase','active_cell'),
-#           Input('mdt_table_increase','data'),
-#           Input('mdt_table_decrease','active_cell'),
-#           Input('mdt_table_decrease','data'),])
-
-# def update_detail_table(start_date, end_date, active_cell_increase, table_data_increase, active_cell_decrease, table_data_decrease):
-
-#     if (active_cell_increase is None) & (active_cell_decrease is None):
-#         factory_name = '大森 TIM BER'
-#     else:
-#         triggered = ctx.triggered_id
-#         active_cell = active_cell_increase if triggered == "mdt_table_increase" else active_cell_decrease
-#         data = table_data_increase if triggered == "mdt_table_increase" else table_data_decrease
-#         factory_name = get_table_value(active_cell, data)
-
-#     start_date = datetime.strptime(start_date, '%Y-%m-%d')
-#     end_date = datetime.strptime(end_date, '%Y-%m-%d')
-
-#     df = get_mom_1_factory(start_date, factory_name)
-    
-
-#     df['sales_date'] = pd.to_datetime(df['sales_date'])
-#     df['month'] = df['sales_date'].dt.month
-#     df_grouped = df.groupby('month').agg({'sales_quantity':'sum'}).reset_index()
-#     df_grouped.sort_values(by='month')
-#     df_grouped['diff'] = df_grouped['sales_quantity'].diff()
-#     df_grouped['pct_change'] = df_grouped['sales_quantity'].pct_change() * 100
-#     df_grouped[['sales_quantity','diff']] = df_grouped[['sales_quantity','diff']].round(0)
-#     df_grouped['pct_change'] = df_grouped['pct_change'].round(2)
-
-#     new_column_names = {
-#         'month': '月 - Tháng',
-#         'sales_quantity': '銷售數量 - SL giao hàng',
-#         'diff': '與上個月相比的差異 - Chênh lệch so với tháng trước',
-#         'pct_change': '%Chênh lệch'
-#     }
-
-
-#     df_grouped = df_grouped.rename(columns=new_column_names)
-#     return df_grouped.to_dict('records')
-
-
-
 
 @callback(
         [Output('col_mdt_table_increase', 'style'),
@@ -394,14 +349,3 @@ def toggle_table_visibility1(n_clicks):
         # Hide table when n_clicks is even
         return {"display": "none"}
     
-# @callback(
-#     Output("row_mom_table", "style"),
-#     Input("mom_table_btn", "n_clicks")
-# )
-# def toggle_table_visibility(n_clicks):
-#     if n_clicks % 2 == 1:
-#         # Show table when n_clicks is odd
-#         return {"display": "block"}
-#     else:
-#         # Hide table when n_clicks is even
-#         return {"display": "none"}

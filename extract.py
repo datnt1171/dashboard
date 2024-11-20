@@ -281,7 +281,7 @@ def get_total_order(factory_list, target_year, target_month):
 
 
 def get_mtd_product(start_date, end_date, start_date_target, end_date_target, factory_name):
-    CUMSUM_PERCENT = 90
+
 
     # Get product list
     conn = psycopg2.connect(database=database_name, user=database_user, password=database_password
@@ -328,18 +328,7 @@ def get_mtd_product(start_date, end_date, start_date_target, end_date_target, fa
     data = cur.fetchall()
     column_names = [description[0] for description in cur.description]
     df = pd.DataFrame(data = data, columns = column_names)
-
-    
-    df['quantity_diff'] = df['total_quantity'] - df['total_quantity_prev']
-    df['quantity_diff_abs'] = df['quantity_diff'].abs()
-    df.sort_values(by='quantity_diff_abs', ascending=False, inplace=True)
-    df['percentage'] = df['quantity_diff_abs'] / df['quantity_diff_abs'].sum() * 100
-    df['cumsum'] = df['percentage'].cumsum()
-    #df = df[(df['total_quantity'] != 0) | (df['total_quantity_prev'] != 0)]
-
-    df_filter = df[df['cumsum']<=CUMSUM_PERCENT]
-    df_filter.sort_values(by='quantity_diff', ascending=False, inplace=True)
-    return df_filter, df
+    return df
 
 
 def get_table_value(active_cell, data):
