@@ -8,7 +8,7 @@ from matplotlib.ticker import PercentFormatter
 
 matplotlib.rcParams['font.family'] = ['SIMSUN','Times New Roman']
 
-def plot_sales_order_target(df_fig):
+def plot_sales_order_target(df_fig, target_year, target_month):
     fig, ax1 = plt.subplots(figsize=(13, 6))
 
     width = 0.25  # Width of the bars
@@ -38,9 +38,9 @@ def plot_sales_order_target(df_fig):
 
     # Line plots for target percentages
     ax2.plot(x, df_fig['order_target%'], color='red', marker='o',
-             label='相較2022年5月訂單達成% - ĐĐH đạt % so với tháng 5')
+             label=f'相較{target_year}年{target_month}月訂單達成% - ĐĐH đạt % so với tháng {target_month}')
     ax2.plot(x, df_fig['sales_target%'], color='orange', marker='o',
-             label='相較2022年5月送貨達成% - Giao hàng đạt % so với tháng 5')
+             label=f'相較{target_year}年{target_month}月送貨達成% - Giao hàng đạt % so với tháng {target_month}')
 
     # Set secondary axis label and format ticks as percentage
     ax2.set_ylabel('Target %')
@@ -55,9 +55,9 @@ def plot_sales_order_target(df_fig):
                     (x[i], df_fig['order_target%'][i]), 
                     textcoords="offset points", 
                     xytext=(0, 5), 
-                    ha='center',
+                    ha='left',
                     color='red',
-                    fontsize=12,
+                    fontsize=14,
                     fontweight='bold')
 
     for i, value in enumerate(df_fig['sales_target%']):
@@ -66,9 +66,9 @@ def plot_sales_order_target(df_fig):
                     df_fig['sales_target%'][i]),
                     textcoords="offset points",
                     xytext=(0, 5),
-                    ha='center',
+                    ha='right',
                     color='black',
-                    fontsize=12,
+                    fontsize=14,
                     fontweight='bold')
         
     plt.tight_layout()

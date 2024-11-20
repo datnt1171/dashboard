@@ -78,7 +78,7 @@ VALID_USERNAME_PASSWORD_PAIRS = {
 app = dash.Dash(__name__, use_pages=True,  external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP])
 app.server.secret_key = 'your_secret_key_here1@'
 auth = dash_auth.BasicAuth(app, VALID_USERNAME_PASSWORD_PAIRS)
-PLOTLY_LOGO = "/assets/white_logo.png"
+PLOTLY_LOGO = "assets/logos/white_logo.png"
 
 # Main Navbar for department selection
 

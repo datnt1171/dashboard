@@ -2,16 +2,14 @@ import dash
 from dash import html, dcc, dash_table, callback, Input, Output, ctx
 import dash_bootstrap_components as dbc
 import plotly.express as px
-import pandas as pd
+
 
 from datetime import datetime, timedelta
-import calendar
 from dateutil.relativedelta import relativedelta
 
 import constants
+from extract import get_mtd_factory_sales,get_table_value, get_mtd_product, get_sales_all
 
-from extract import get_mtd_factory_sales
-from extract import get_table_value, get_mtd_product, get_total_sales, get_mom_1_factory, get_sales_all
 
 dash.register_page(__name__, path="/warehouse_factory")
 
@@ -61,7 +59,7 @@ layout = dbc.Container([
         dbc.Col([
             dbc.Row([
                 dbc.Col([
-                    html.H4("銷售差異-Chêch lệch bán hàng"),
+                    html.H4("数量差异 SỐ LƯỢNG CHÊNH LỆCH"),
                 ])
             ]),
 
@@ -94,7 +92,7 @@ layout = dbc.Container([
                         },
                         style_data_conditional=[
                             {
-                                "if": {"column_id": "銷售差異 - Chêch lệch bán hàng"}, 
+                                "if": {"column_id": "数量差异 SỐ LƯỢNG CHÊNH LỆCH"}, 
                                 "backgroundColor": "#FFFF00",
                                 "pointerEvents": "none"  # Makes the row non-clickable
                             }
@@ -114,7 +112,7 @@ layout = dbc.Container([
                         },
                         style_data_conditional=[
                             {
-                                "if": {"column_id": "銷售差異 - Chêch lệch bán hàng"}, 
+                                "if": {"column_id": "数量差异 SỐ LƯỢNG CHÊNH LỆCH"}, 
                                 "backgroundColor": "#FFFF00",
                                 "pointerEvents": "none"  # Makes the row non-clickable
                             }
@@ -133,7 +131,6 @@ layout = dbc.Container([
 
 
         dbc.Col([
-
 
             dbc.Row([
                 dbc.Col([
@@ -159,30 +156,21 @@ layout = dbc.Container([
             dbc.Row([
                 dash_table.DataTable(id='mom_product',
                                      style_cell={
-                                            'padding': '5px',
-                                            'minWidth': '60px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
+                                        'padding': '5px',
+                                        'minWidth': '60px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
                                         },
                                      style_data={
-                                            'whiteSpace': 'normal',  # Wrap text instead of adding extra space
-                                            'height': 'auto',        # Allow the row height to adjust
-                                            'lineHeight': '15px'     # Control line spacing
+                                        'whiteSpace': 'normal',  # Wrap text instead of adding extra space
+                                        'height': 'auto',        # Allow the row height to adjust
+                                        'lineHeight': '15px'     # Control line spacing
                                         },
                                      )
             ], id='row_mom_product', style={"display": "none"}),
 
-            # dbc.Row([
-            #     dbc.Button("顯示逐月銷售狀況 - Chi tiết bán hàng từng tháng", id='mom_table_btn', outline=True,
-            #                 color="info", className="me-1", n_clicks=0),
-            # ]),
-
-            # dbc.Row([
-            #     dash_table.DataTable(id='mom_table',
-            #                          )
-            # ],style={"display": "none"},id='row_mom_table')
         ], width=9)
     ])
 
-],fluid=True)
+], fluid=True)
 
 @callback(
     [Output('mdt_table_increase', 'data'),
@@ -203,40 +191,30 @@ def update_table_sales(start_date, end_date, start_date_target, end_date_target)
     end_date = datetime.strptime(end_date, '%Y-%m-%d')
     start_date_target = datetime.strptime(start_date_target, '%Y-%m-%d')
     end_date_target = datetime.strptime(end_date_target, '%Y-%m-%d')
-        
+
 
     df = get_mtd_factory_sales(start_date, end_date, start_date_target, end_date_target)
-
-    df[['total_quantity','total_quantity_prev','quantity_diff','quantity_diff_abs']] = \
-    df[['total_quantity','total_quantity_prev','quantity_diff','quantity_diff_abs']].round(0)
-
-    df['pct_change'] = df['pct_change'].round(2)
-    df['pct_change'] = df['pct_change'].map("{:,.2f}%".format)
+    df = df[['factory_name','quantity_diff']]
+    df['quantity_diff'] = df['quantity_diff'].round(0)
 
     df.sort_values(by='quantity_diff', ascending=True, inplace=True)
 
-    # Append other information
-    factory_list = df['factory_code']
-    total_sales = get_total_sales(factory_list, start_date_target.year, start_date_target.month)
-    df = df.merge(total_sales, how='left', on='factory_code')
-    df = df[['factory_name','quantity_diff']]
-
     ### CHECK THIS AGAIN ###
-    df.drop_duplicates(subset=['factory_name'], inplace=True) 
+    #df.drop_duplicates(subset=['factory_name'], inplace=True) 
     ### CHECK THIS AGAIN ###
     new_column_names = {
-        'factory_name': '客戶簡稱 - Tên KH',
-        'quantity_diff': '銷售差異 - Chêch lệch bán hàng',
+        'factory_name': '客戶名称 TÊN KHÁCH HÀNG',
+        'quantity_diff': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
     }
     df = df.rename(columns=new_column_names)
 
 
     columns = [{"name": i, "id": i} for i in df.columns]
 
-    df_increase = df[df['銷售差異 - Chêch lệch bán hàng']>=1000]
-    df_decrease = df[df['銷售差異 - Chêch lệch bán hàng']<=-1000]
-    df_increase.sort_values(by='銷售差異 - Chêch lệch bán hàng',ascending=False, inplace=True)
-    df_decrease.sort_values(by='銷售差異 - Chêch lệch bán hàng',ascending=True, inplace=True)
+    df_increase = df[df['数量差异 SỐ LƯỢNG CHÊNH LỆCH']>=1000]
+    df_decrease = df[df['数量差异 SỐ LƯỢNG CHÊNH LỆCH']<=-1000]
+    df_increase.sort_values(by='数量差异 SỐ LƯỢNG CHÊNH LỆCH', ascending=False, inplace=True)
+    df_decrease.sort_values(by='数量差异 SỐ LƯỢNG CHÊNH LỆCH', ascending=True, inplace=True)
     
     return [df_increase.to_dict('records'), columns,
             df_decrease.to_dict('records'), columns]
@@ -245,17 +223,18 @@ def update_table_sales(start_date, end_date, start_date_target, end_date_target)
 @callback(
         [Output('product_increase', 'figure'),
         Output('product_decrease', 'figure'),
-        Output('horizontal_bar_product','figure'),
-        Output('mom_product','data'),
+        Output('horizontal_bar_product', 'figure'),
+        Output('mom_product', 'data'),
         Output('warehouse_factory_title', 'children'),],
+
         [Input('factory_day_range', 'start_date'),
         Input('factory_day_range', 'end_date'),
         Input('target_factory_day_range', 'start_date'),
         Input('target_factory_day_range', 'end_date'),
-        Input('mdt_table_increase','active_cell'),
-        Input('mdt_table_increase','data'),
-        Input('mdt_table_decrease','active_cell'),
-        Input('mdt_table_decrease','data'),]
+        Input('mdt_table_increase', 'active_cell'),
+        Input('mdt_table_increase', 'data'),
+        Input('mdt_table_decrease', 'active_cell'),
+        Input('mdt_table_decrease', 'data'),]
 )
 
 def update_chart(start_date, end_date, start_date_target, end_date_target, active_cell_increase, table_data_increase, active_cell_decrease, table_data_decrease):
@@ -282,13 +261,13 @@ def update_chart(start_date, end_date, start_date_target, end_date_target, activ
 
     fig_increase = px.bar(df_increase, x='product_name', y='quantity_diff', text_auto=True)
     fig_increase.update_traces(marker_color='#339966', textposition='outside')
-    max_y = df_increase['quantity_diff'].max() * 1.2  # Increase by 10%
-    fig_increase.update_layout(yaxis_range=[0, max_y], 
+    max_y = df_increase['quantity_diff'].max() * 1.2  # Increase by 20%
+    fig_increase.update_layout(yaxis_range=[0, max_y],
                                 xaxis_title="產品名稱 - Tên SP",
                                 yaxis_title="數量 - Số lượng",
-                                yaxis=dict(tickformat='d'),
+                                yaxis=dict(tickformat=',.0f'),
                                 title='產品增加 - Sản phẩm tăng', 
-                                title_font=dict(size=24, color='black'), 
+                                title_font=dict(size=24, color='black'),
                                 title_x=0.5  # Center the title (0 is left, 0.5 is center, 1 is right)
                                )
 
@@ -299,7 +278,7 @@ def update_chart(start_date, end_date, start_date_target, end_date_target, activ
     fig_decrease.update_layout(yaxis_range=[0, min_y],
                                 xaxis_title="產品名稱 - Tên SP",
                                 yaxis_title="數量 - Số lượng",
-                                yaxis=dict(tickformat='d'),
+                                yaxis=dict(tickformat=',.0f'),
                                 title='產品減少 - Sản phẩm giảm', 
                                 title_font=dict(size=24, color='black'), 
                                 title_x=0.5  # Center the title (0 is left, 0.5 is center, 1 is right)
@@ -334,7 +313,7 @@ def update_chart(start_date, end_date, start_date_target, end_date_target, activ
         'product_name': f'產品名稱 - Tên SP',
         'total_quantity': f'{start_date.date()} 天到 {end_date.date()} 天的銷售額 - Bán hàng từ {start_date.date()} đến {end_date.date()}',
         'total_quantity_prev': f'{start_date_target.date()} 天到 {end_date_target.date()} 天的銷售額 - Bán hàng từ {start_date_target.date()} đến {end_date_target.date()}',
-        'quantity_diff': '銷售差異 - Chêch lệch bán hàng',
+        'quantity_diff': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
     }
 
     df = df.rename(columns=new_column_names)
