@@ -14,7 +14,7 @@ VALID_USERNAME_PASSWORD_PAIRS = {
     'dat': '123',
     'stanley': '123',
     'dungtq': '123',
-    'banv': '123'
+    'KHOBA': '123'
 }
 
 
@@ -81,7 +81,6 @@ auth = dash_auth.BasicAuth(app, VALID_USERNAME_PASSWORD_PAIRS)
 PLOTLY_LOGO = "assets/logos/white_logo.png"
 
 # Main Navbar for department selection
-
 navbar = dbc.Navbar(
     dbc.Container([
         # Use row and col to control vertical alignment of logo / brand
@@ -102,7 +101,7 @@ navbar = dbc.Navbar(
                 dbc.Col(dbc.DropdownMenu(                          # Warehouse Department
                     children=[
                         dbc.DropdownMenuItem("全面的 - Tổng quát", href="/warehouse_overall"),
-                        dbc.DropdownMenuItem("所有客戶 - Tất cả khách hàng", href="/warehouse_mom"),
+                        dbc.DropdownMenuItem("客戶詳情 - Chi tiết khách hàng", href="/warehouse_mom"),
                         dbc.DropdownMenuItem("客戶產品詳情 - Chi tiết SP của KH", href="/warehouse_factory"),
                         dbc.DropdownMenuItem("預期交付和實際交付 - Dự định/Thực tế GH", href="/delivered_percentage"),
                         dbc.DropdownMenuItem("比較 - So sánh", href="/warehouse_drilldown"),

@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 
 import constants
 from extract import get_mtd_factory_sales,get_table_value, get_mtd_product, get_sales_all
-
+from global_variable import max_sales_date, max_import_wh_timestamp
 
 dash.register_page(__name__, path="/warehouse_factory")
 
@@ -25,8 +25,8 @@ same_day_last_month_fisrt = same_day_last_month.replace(day=1)
 layout = dbc.Container([
     dbc.Row([
         dbc.Col([
-            html.H1(id='warehouse_factory_title')
-        ], align='center'),
+            html.H2(id='warehouse_factory_title')
+        ],width=3, align='center'),
 
         dbc.Col([
             html.H6(["選擇要比較的時間段", html.Br(), "Chọn khoảng thời gian để so sánh"]),
@@ -37,6 +37,7 @@ layout = dbc.Container([
             end_date=same_day_last_month,
             updatemode='bothdates',
             display_format=constants.date_format,
+
             )
         ]),
 
@@ -49,10 +50,20 @@ layout = dbc.Container([
             end_date=yesterday,
             updatemode='bothdates',
             display_format=constants.date_format,
+    
             )
         ]),
 
-    ], style={'padding': '5px'}),
+        dbc.Col([
+            dbc.Row([
+                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
+            ]),
+            # dbc.Row([
+            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+            # ])
+        ], width=2, class_name='update_note'),
+
+    ], style={'padding': '5px'}, class_name='filter_panel'),
 
 
     dbc.Row([
@@ -320,7 +331,7 @@ def update_chart(start_date, end_date, start_date_target, end_date_target, activ
     }
     df = df.rename(columns=new_column_names)
 
-    warehouse_factory_title = f'{factory_name}'
+    warehouse_factory_title = f'購買詳情 - Chi tiết GH: {factory_name}'
 
     return [fig_increase, fig_decrease, fig_sales_all, df.to_dict('records'), warehouse_factory_title]
 

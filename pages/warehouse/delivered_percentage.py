@@ -6,6 +6,8 @@ import pandas as pd
 from datetime import datetime
 
 from extract import get_factory_list, get_overall_sales, get_overall_planned
+from global_variable import max_sales_date, max_import_wh_timestamp
+
 dash.register_page(__name__, path="/delivered_percentage")
 
 
@@ -15,17 +17,26 @@ layout = dbc.Container([
     dbc.Row([
 
         dbc.Col([
-            html.H1('計劃及實際銷售 - Dự định GH và GH thực tế', style={'text-align':'center'})
-        ]),
-
-        dbc.Col([
             html.H6("選擇客戶 - Chọn KH"),
             dcc.Dropdown(id='factory_dropdown_plan' ,
                          options=factory_list['factory_name'], 
                          value='大森 TIM BER',
                          clearable=False,)
-        ], width=2)
-    ],style={'padding-top':'5px'}),
+        ], width=2),
+
+        dbc.Col([
+            html.H1(id='plan_title', style={'text-align':'center'})
+        ]),
+
+        dbc.Col([
+            dbc.Row([
+                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
+            ]),
+            # dbc.Row([
+            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+            # ])
+        ], width=2, class_name='update_note'),
+    ],style={'padding-top':'5px'}, class_name='filter_panel'),
 
     dbc.Row([
         dbc.Col([
@@ -34,6 +45,14 @@ layout = dbc.Container([
     ]),
    
 ])
+
+@callback(
+    Output('plan_title','children'),
+    Input('factory_dropdown_plan', 'value')
+)
+def update_title(factory_name):
+    return f'計劃及實際銷售 - Dự định GH và GH thực tế {factory_name}'
+
 
 @callback(
     [Output('bar_plan', 'figure'),],

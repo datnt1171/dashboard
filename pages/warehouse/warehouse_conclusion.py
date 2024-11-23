@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from extract import get_sales_same_month, get_order_same_month, get_text, get_color
 from transform import col_to_date
-
+from global_variable import max_sales_date, max_import_wh_timestamp
 import plotly.graph_objects as go
 import constants
 
@@ -25,7 +25,7 @@ layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             html.H1('结论 KẾT LUẬN')
-        ]),
+        ], align='center'),
 
         dbc.Col([
             html.H6(["選擇要比較的時間段", html.Br(),"Chọn khoảng thời gian để so sánh"]),
@@ -50,8 +50,17 @@ layout = dbc.Container([
             display_format=constants.date_format,
             )
         ]),
+
+        dbc.Col([
+            dbc.Row([
+                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
+            ]),
+            # dbc.Row([
+            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+            # ])
+        ], width=2, class_name='update_note'),
         
-    ], style={'padding':'5px'}),
+    ], style={'padding':'5px'}, class_name='filter_panel'),
 
 
     dbc.Row([
@@ -194,18 +203,17 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
 
     # Add line traces
     fig.add_trace(
-        go.Scatter(
-            x=df_all["month"],
-            y=df_all["order_quantity"],
-            name="總訂單 - Tổng SL ĐĐH",
-            mode="lines+markers+text",
-            line=dict(color="red", width=2),
-            text=df_all["order_quantity"].apply(lambda x: f"{x:,.0f}"),  # Add values as text
-            textposition="top center",
-            textfont=dict(color="red")
-            
-        )
+    go.Scatter(
+        x=df_all["month"],
+        y=df_all["order_quantity"],
+        name="總訂單 - Tổng SL ĐĐH",
+        mode="lines+markers+text",
+        line=dict(color="red", width=2),
+        text=df_all["order_quantity"].apply(lambda x: f"{x:,.0f}"),  # Add values as text
+        textposition='top right',
+        textfont=dict(color="red")
     )
+)
     fig.add_trace(
         go.Scatter(
             x=df_all["month"],
@@ -214,7 +222,7 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
             mode="lines+markers+text",
             line=dict(color="green", width=2),
             text=df_all["sales_quantity"].apply(lambda x: f"{x:,.0f}"),  # Add values as text
-            textposition="top center",
+            textposition='top left',  # Adjust text position dynamically
             textfont=dict(color="green")
         )
     )

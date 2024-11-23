@@ -85,3 +85,16 @@ h2, h3, h4 {
 .conclusion-title {
     text-align: left;
 }
+
+.update_note {
+    border-left: 5px solid #3399FF; /* Blue left border with width 5px */
+    background-color: #e0ffff; /* Light blue background color */
+    padding: 5px; /* Add some padding for spacing */
+    font-size: 16px; /* Set font size */
+    margin: 10px; /* Add margin around the element */
+}
+
+.filter_panel {
+    border-bottom: 1px solid red;
+    padding-bottom: 5px;
+}

@@ -3,23 +3,30 @@ from dash import html, dcc, callback, Input, Output
 import dash_bootstrap_components as dbc
 
 from datetime import datetime
+
 from extract import get_overall_order, get_overall_sales, extract_order_target, extract_sales_target
 from transform import col_to_date, filter_selected_day
-
 from plot_fig import plot_sales_order_target
-
+from global_variable import max_sales_date, max_import_wh_timestamp
 import constants
 
 dash.register_page(__name__, path="/warehouse_overall")
+
+
 
 layout = dbc.Container([
     dbc.Row([
 
         dbc.Col([
-            html.H6("選擇日期範圍 - Chọn khoảng thời gian"), #Select day range
-            # Add DatePickerRange
-            dcc.RangeSlider(1, 31, 1, value=[1, 31], id='day_slicer_month'),
-        ], width=6),
+            dbc.Row([
+                html.H6("選擇日期範圍 - Chọn khoảng thời gian"), #Select day range
+                # Add DatePickerRange
+                dcc.RangeSlider(1, 31, 1,
+                                value=[1, max_sales_date.day], 
+                                id='day_slicer_month',
+                                marks={i: {'label': str(i), 'style': {'color': 'gray' if i > max_sales_date.day else 'black'}} for i in range(1, 32)},),
+            ]),
+        ], width=5),
 
         dbc.Col([
             html.H6("目標月份 - Tháng mục tiêu"), #Target month
@@ -35,8 +42,18 @@ layout = dbc.Container([
                          value=2022,
                          id='target_year',
                          clearable=False)
-        ], width=2)
-    ], style={'padding':'5px'}),
+        ], width=2),
+
+        dbc.Col([
+            dbc.Row([
+                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
+            ]),
+            # dbc.Row([
+            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+            # ])
+        ], width=2, class_name='update_note', align='right'),
+
+    ], style={'padding':'5px'}, class_name='filter_panel'),
     
     dbc.Row([
         html.H2(id='weekly_title_tw'),

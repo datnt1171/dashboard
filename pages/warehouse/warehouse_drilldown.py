@@ -10,10 +10,10 @@ from dash import html, dcc, callback, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
-import constants
-from extract import get_overall_order, get_overall_sales, get_overall_planned
-from extract import get_factory_list, get_product_list
 
+import constants
+from extract import  get_overall_sales, get_factory_list, get_product_list
+from global_variable import max_sales_date, max_import_wh_timestamp
 
 # Get data
 
@@ -23,8 +23,20 @@ factory_list = get_factory_list()
 product_list = get_product_list()
 layout = dbc.Container([
     dbc.Row([
-        html.H2("按年份比較交貨 - So sánh giao hàng theo từng năm"),
-    ]),
+        dbc.Col([],width=3),
+        dbc.Col([
+            html.H2("按年份比較交貨 - So sánh SL giao hàng theo từng năm"),
+        ]),
+        
+        dbc.Col([
+            dbc.Row([
+                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
+            ]),
+            # dbc.Row([
+            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+            # ])
+        ], width=2, class_name='update_note'),
+    ], class_name='filter_panel'),
 
     dbc.Row([
         dbc.Col([

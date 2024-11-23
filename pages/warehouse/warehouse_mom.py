@@ -4,8 +4,10 @@ import dash_bootstrap_components as dbc
 from datetime import datetime, timedelta, date
 import calendar
 from dateutil.relativedelta import relativedelta
-from extract import get_mtd_factory_sales, get_mtd_factory_order, get_planned_deliveries
-from extract import get_total_sales, get_total_order
+
+from extract import get_mtd_factory_sales, get_mtd_factory_order, \
+get_planned_deliveries, get_total_sales, get_total_order
+from global_variable import max_sales_date, max_import_wh_timestamp
 import constants
 
 
@@ -29,7 +31,7 @@ layout = dbc.Container([
                 labelCheckedClassName="active",
                 options=[
                     {"label": "送货 GIAO HÀNG", "value": "sales"},
-                    {"label": "訂單ĐĐH", "value": "order"},
+                    {"label": "訂單 ĐĐH", "value": "order"},
                 ],
                 value="sales",
             ),
@@ -41,8 +43,8 @@ layout = dbc.Container([
                 labelClassName="btn btn-outline-primary",
                 labelCheckedClassName="active",
                 options=[
-                    {"label": "增加↑↑ - Tăng↑↑", "value": "increase"},
-                    {"label": "減少↓↓ - Giảm↓↓", "value": "decrease"},
+                    {"label": "增加↑↑ Tăng↑↑", "value": "increase"},
+                    {"label": "減少↓↓ Giảm↓↓", "value": "decrease"},
                 ],
                 value="increase",
             ),
@@ -58,6 +60,7 @@ layout = dbc.Container([
             end_date=same_day_last_month,
             updatemode='bothdates',
             display_format=constants.date_format,
+
             )
         ]),
 
@@ -70,6 +73,7 @@ layout = dbc.Container([
             end_date=yesterday,
             updatemode='bothdates',
             display_format=constants.date_format,
+            
             )
         ]),
 
@@ -79,11 +83,19 @@ layout = dbc.Container([
                         options=constants.SALESMAN + ['全部 - Tất cả'],
                         value='全部 - Tất cả',
                         clearable=False,
-
                         )
         ], width=2),
 
-    ], style={'padding':'5px'}),
+        dbc.Col([
+            dbc.Row([
+                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
+            ]),
+            # dbc.Row([
+            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+            # ])
+        ], width=2, class_name='update_note'),
+
+    ],class_name='filter_panel', style={'padding':'5px'}),
 
 ####################################################################################
     dbc.Row([

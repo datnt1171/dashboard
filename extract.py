@@ -460,3 +460,19 @@ def get_color(value):
         return "green" if value > 0 else "red"
 def get_text(value):
     return "增加TĂNG" if value > 0 else "减少GIẢM"
+
+def get_max_sales_date():
+    conn = psycopg2.connect(database=database_name, user=database_user, password=database_password
+                            , host=database_host, port=database_port)
+    cur = conn.cursor()
+    cur.execute("""SELECT MAX(sales_date)
+                FROM fact_sales""")
+    return cur.fetchone()[0]
+    
+def get_max_import_wh_timestamp():
+    conn = psycopg2.connect(database=database_name, user=database_user, password=database_password
+                            , host=database_host, port=database_port)
+    cur = conn.cursor()
+    cur.execute("""SELECT MAX(import_wh_timestamp)
+                FROM fact_sales""")
+    return cur.fetchone()[0]
