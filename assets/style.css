@@ -1,0 +1,100 @@
+/*Global styling */
+h2, h3, h4 {
+    text-align: center;
+}
+
+/* Navbar Styling */
+.navbar {
+    /*background-color: #cdcaca; /* Light gray background */
+    box-shadow: 0px 4px 2px -2px gray; /* Drop shadow */
+    padding: 5px; /* Add some padding */
+    position: sticky;
+    top: 0;
+    z-index: 1020; /* Ensures it stays on top of other content */
+}
+
+.navbar-brand {
+    font-size: 24px; /* Larger font size for the brand */
+    font-weight: bold; /* Bold brand text */
+    color: #fff4f4; /* Blue color for the brand */
+}
+
+.left-side-navbar {
+    align-items: center; /* Vertically align items to the center */
+}
+
+.navbar-brand:hover {
+    color: #ffffff; /* Darker blue on hover */
+}
+
+.navbar .nav-link {
+    font-size: 18px; /* Font size for the links */
+    color: #ffffff !important; /* Dark gray text */
+}
+
+.navbar .nav-link:hover {
+    color: #ffffff; /* Blue color on hover */
+}
+
+.navbar .dropdown-menu {
+    font-size: 16px; /* Font size for dropdown items */
+    background-color: #ffffff; /* White background */
+    border: 1px solid #717171; /* Light border around dropdown */
+    border-radius: 5px; /* Rounded corners */
+}
+
+
+
+
+/* .dropdown-menu[aria-expanded="true"] .dropdown-item {
+    background-color: #f8f9fa; backgroup when expanded
+} */
+
+/* .navbar .nav-item {
+    padding: 0 15px; /* Add padding to the navigation items 
+} */
+
+
+.navbar .nav-link-child:hover {
+    background-color: #ffe8e8; /* Darker green on hover */
+}
+
+/* System Sheet Link */
+.navbar .nav-link:last-child {
+    background-color: #198754; /* Green background for the last link */
+    color: white; /* White text */
+    padding: 8px 12px; /* Padding around the link */
+    border-radius: 5px; /* Rounded corners */
+}
+
+.navbar .nav-link:last-child:hover {
+    background-color: #145f43; /* Darker green on hover */
+}
+
+.custom-card {
+    width: 250px; /* Set the desired width */
+    height: 150px; /* Set the desired height */
+    /* Additional styling */
+    background-color: #faf8f8; /* Background color */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    padding: 0%;
+    
+}
+
+.conclusion-title {
+    text-align: left;
+}
+
+.update_note {
+    border-left: 5px solid #3399FF; /* Blue left border with width 5px */
+    background-color: #e0ffff; /* Light blue background color */
+    padding: 5px; /* Add some padding for spacing */
+    font-size: 16px; /* Set font size */
+    margin: 10px; /* Add margin around the element */
+}
+
+.filter_panel {
+    border-bottom: 1px solid red;
+    padding-bottom: 5px;
+}
