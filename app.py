@@ -57,7 +57,7 @@ def login(message=""):
                 url = session['url']
                 session['url'] = None
                 return redirect(url)  # Redirect to the target URL
-            return redirect('/')  # Redirect to home
+            return redirect('/home')  # Redirect to home
 
     else:
         if current_user:
