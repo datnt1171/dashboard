@@ -98,7 +98,8 @@ def update_content(start_date, end_date):
 def update_bar(hoverData):
     if hoverData is None:
         fig = px.histogram(df, x='category', histfunc='sum')
-        dff = df.copy()
+        dff = df[['product_name','actual_quantity','loss_quantity','loss_rate']]
+        dff['loss_rate'] = round(dff['loss_rate'] * 100,2)
         return fig, dff.to_dict('records')
 
     # Extract the date from hoverData
@@ -108,5 +109,5 @@ def update_bar(hoverData):
     dff_category = dff.groupby('category', as_index=False).agg({'estimated_quantity':'sum'})
     dff_category.columns = ['category','estimated_quantity']
     fig = px.bar(dff_category, x='category',y='estimated_quantity')
-
-    return fig, dff[['order_code','product_name','estimated_quantity']].to_dict('records')
+    dff['loss_rate'] = round(dff['loss_rate'] * 100,2)
+    return fig, dff[['product_name','actual_quantity','loss_quantity','loss_rate']].to_dict('records')

@@ -62,7 +62,7 @@ def login(message=""):
     else:
         if current_user:
             if current_user.is_authenticated:
-                return redirect('/')
+                return redirect('/home')
     return render_template('login.html', message=message)
 
 @server.route('/logout', methods=['GET'])

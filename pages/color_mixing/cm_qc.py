@@ -25,7 +25,7 @@ layout = dbc.Container([
     
     dbc.Row([
         dbc.Col([
-            html.Title("Select Date Range"),
+            html.H2("Select Date Range"),
             # Add DatePickerRange
             dcc.DatePickerRange(
             id='date-picker-range',
@@ -37,24 +37,24 @@ layout = dbc.Container([
    
     dbc.Row([
         dbc.Col([
-            html.Title("Loss_rate% by package size"),
+            html.H2("Loss_rate% by package size"),
             dcc.Graph(figure={}, id='bar_loss_rate_analytic')
         ], width=6),
 
         dbc.Col([
-            html.Title("Actual quantity by package size"),
+            html.H2("Actual quantity by package size"),
             dcc.Graph(figure={}, id='donut_quantity_analytic')
         ], width=6)
     ]),
 
     dbc.Row([
         dbc.Col([
-            html.Title("Loss quantity by package size"),
+            html.H2("Loss quantity by package size"),
             dcc.Graph(figure={}, id='bar_avg_loss_quantity_analytic')
         ], width=6),
 
         dbc.Col([
-            html.Title("Total loss quantity by pakage size"),
+            html.H2("Total loss quantity by pakage size"),
             dcc.Graph(figure={}, id='bar_sum_loss_quantity_analytic')
         ], width=6),
 
@@ -63,7 +63,7 @@ layout = dbc.Container([
     
     dbc.Row([
         dbc.Col([
-            html.Title("Data selected from ERP"),
+            html.H2("Data selected from ERP"),
             dash_table.DataTable(id='table_data_analytic', page_size=6),
         ], width=4)
     ])
