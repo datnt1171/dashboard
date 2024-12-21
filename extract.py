@@ -476,3 +476,32 @@ def get_max_import_wh_timestamp():
     cur.execute("""SELECT MAX(import_wh_timestamp)
                 FROM fact_sales""")
     return cur.fetchone()[0]
+
+def get_all_row_order(start_date, end_date):
+    conn = psycopg2.connect(database=database_name, user=database_user, password=database_password
+                            , host=database_host, port=database_port)
+    cur = conn.cursor()
+
+    cur.execute("""SELECT * from fact_order
+                WHERE order_date BETWEEN %(start_date)s AND %(end_date)s""",
+                {'start_date': start_date, 'end_date': end_date})
+    
+    data = cur.fetchall()
+    column_names = [description[0] for description in cur.description]
+    df = pd.DataFrame(data = data, columns = column_names)
+    return df
+
+
+def get_all_row_sales(start_date, end_date):
+    conn = psycopg2.connect(database=database_name, user=database_user, password=database_password
+                            , host=database_host, port=database_port)
+    cur = conn.cursor()
+
+    cur.execute("""SELECT * from fact_sales
+                WHERE sales_date BETWEEN %(start_date)s AND %(end_date)s""",
+                {'start_date': start_date, 'end_date': end_date})
+
+    data = cur.fetchall()
+    column_names = [description[0] for description in cur.description]
+    df = pd.DataFrame(data = data, columns = column_names)
+    return df
