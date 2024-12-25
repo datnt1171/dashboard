@@ -71,7 +71,9 @@ def logout():
         if current_user.is_authenticated:
             logout_user()
     return render_template('login.html')
-
+@server.route('/')
+def index_redirect():
+    return redirect('/home')
 
 # Login manager object will be used to log users in and out:
 login_manager = LoginManager()
@@ -112,7 +114,7 @@ def render_navbar(n_intervals):
             dbc.Row(
                 [
                     dbc.Col(html.Img(src="assets/logos/white_logo.png", height="45px")), # Logo
-                    dbc.Col(dbc.NavbarBrand("Dashboard",href="/")),    # Home Page
+                    dbc.Col(dbc.NavbarBrand("Dashboard",href="/home")),    # Home Page
                     dbc.Col(dbc.DropdownMenu(                          # Color-Mixing Department
                         children=[
                             dbc.DropdownMenuItem("Daily Report", href="/cm_daily", disabled=disable_page('cm_daily',permissions)),
@@ -184,13 +186,14 @@ def render_navbar(n_intervals):
 
 
 
-
-app.layout = html.Div([
+def serve_layout():
+    return html.Div([
     html.Div(id='navbar'),
     page_container,
     dcc.Interval(id='interval', interval=1 * 1000, max_intervals=1)  # Trigger layout loading once
 ])
 
+app.layout = serve_layout
 
 if __name__ == "__main__":
     app.run_server(debug=True, host="0.0.0.0")

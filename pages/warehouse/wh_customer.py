@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 from extract import get_mtd_factory_sales, get_mtd_factory_order, \
 get_planned_deliveries, get_total_sales, get_total_order
-from global_variable import max_sales_date
+from extract import get_max_sales_date
 import constants
 
 
@@ -23,259 +23,260 @@ first_date = today.replace(day=1)
 same_day_last_month = yesterday - relativedelta(months=1)
 same_day_last_month_fisrt = same_day_last_month.replace(day=1)
 
-layout = dbc.Container([
-    dbc.Row([
-        dbc.Col([
-            dbc.RadioItems(
-                id="wh_customer_radios_sales",
-                className="btn-group",
-                inputClassName="btn-check",
-                labelClassName="btn btn-outline-primary",
-                labelCheckedClassName="active",
-                options=[
-                    {"label": "送货 GIAO HÀNG", "value": "sales"},
-                    {"label": "訂單 ĐĐH", "value": "order"},
-                ],
-                value="sales",
-            ),
+def layout():
+    return dbc.Container([
+        dbc.Row([
+            dbc.Col([
+                dbc.RadioItems(
+                    id="wh_customer_radios_sales",
+                    className="btn-group",
+                    inputClassName="btn-check",
+                    labelClassName="btn btn-outline-primary",
+                    labelCheckedClassName="active",
+                    options=[
+                        {"label": "送货 GIAO HÀNG", "value": "sales"},
+                        {"label": "訂單 ĐĐH", "value": "order"},
+                    ],
+                    value="sales",
+                ),
 
-            dbc.RadioItems(
-                id="wh_customer_radios_sort",
-                className="btn-group",
-                inputClassName="btn-check",
-                labelClassName="btn btn-outline-primary",
-                labelCheckedClassName="active",
-                options=[
-                    {"label": "增加↑↑ Tăng↑↑", "value": "increase"},
-                    {"label": "減少↓↓ Giảm↓↓", "value": "decrease"},
-                ],
-                value="increase",
-            ),
+                dbc.RadioItems(
+                    id="wh_customer_radios_sort",
+                    className="btn-group",
+                    inputClassName="btn-check",
+                    labelClassName="btn btn-outline-primary",
+                    labelCheckedClassName="active",
+                    options=[
+                        {"label": "增加↑↑ Tăng↑↑", "value": "increase"},
+                        {"label": "減少↓↓ Giảm↓↓", "value": "decrease"},
+                    ],
+                    value="increase",
+                ),
 
-        ]),
-
-        dbc.Col([
-            html.H6(["選擇要比較的時間段", html.Br(),"Chọn khoảng thời gian để so sánh"]),
-            # Add DatePickerRange for target
-            dcc.DatePickerRange(
-            id='wh_customer_date_range_target',
-            start_date=same_day_last_month_fisrt,
-            end_date=same_day_last_month,
-            updatemode='bothdates',
-            display_format=constants.date_format,
-
-            )
-        ]),
-
-        dbc.Col([
-            html.H6(["本月", html.Br(), "Tháng hiện tại"]),
-            # Add DatePickerRange
-            dcc.DatePickerRange(
-            id='wh_customer_date_range',
-            start_date=first_date,
-            end_date=yesterday,
-            updatemode='bothdates',
-            display_format=constants.date_format,
-            
-            )
-        ]),
-
-        dbc.Col([
-            html.H6(["负责人", html.Br(), "Tiếp thị đảm nhiệm"]),
-            dcc.Dropdown(id='wh_customer_dropdown_salesman',
-                        options=constants.SALESMAN + ['全部 - Tất cả'],
-                        value='全部 - Tất cả',
-                        clearable=False,
-                        )
-        ], width=2),
-
-        dbc.Col([
-            dbc.Row([
-                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
             ]),
-            # dbc.Row([
-            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
-            # ])
-        ], width=2, class_name='update_note'),
 
-    ],class_name='filter_panel', style={'padding':'5px'}),
+            dbc.Col([
+                html.H6(["選擇要比較的時間段", html.Br(),"Chọn khoảng thời gian để so sánh"]),
+                # Add DatePickerRange for target
+                dcc.DatePickerRange(
+                id='wh_customer_date_range_target',
+                start_date=same_day_last_month_fisrt,
+                end_date=same_day_last_month,
+                updatemode='bothdates',
+                display_format=constants.date_format,
 
-####################################################################################
-    dbc.Row([
-        dbc.Col([
-            html.H2(id='wh_customer_title_sales_increase'),
-            dash_table.DataTable(
-                id='wh_customer_table_sales_increase',
-                #sort_action="native",
-                style_cell_conditional=[
-                    {
-                        'if': {'column_id': ['數字順序 - STT', '客戶代號 MÃ KHÁCH HÀNG','客戶名称 TÊN KHÁCH HÀNG']},
-                        'textAlign': 'left'
-                    },
-                    {
-                        'if': {
-                            'column_id': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
+                )
+            ]),
+
+            dbc.Col([
+                html.H6(["本月", html.Br(), "Tháng hiện tại"]),
+                # Add DatePickerRange
+                dcc.DatePickerRange(
+                id='wh_customer_date_range',
+                start_date=first_date,
+                end_date=yesterday,
+                updatemode='bothdates',
+                display_format=constants.date_format,
+                
+                )
+            ]),
+
+            dbc.Col([
+                html.H6(["负责人", html.Br(), "Tiếp thị đảm nhiệm"]),
+                dcc.Dropdown(id='wh_customer_dropdown_salesman',
+                            options=constants.SALESMAN + ['全部 - Tất cả'],
+                            value='全部 - Tất cả',
+                            clearable=False,
+                            )
+            ], width=2),
+
+            dbc.Col([
+                dbc.Row([
+                    html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {get_max_sales_date()}')
+                ]),
+                # dbc.Row([
+                #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+                # ])
+            ], width=2, class_name='update_note'),
+
+        ],class_name='filter_panel', style={'padding':'5px'}),
+
+    ####################################################################################
+        dbc.Row([
+            dbc.Col([
+                html.H2(id='wh_customer_title_sales_increase'),
+                dash_table.DataTable(
+                    id='wh_customer_table_sales_increase',
+                    #sort_action="native",
+                    style_cell_conditional=[
+                        {
+                            'if': {'column_id': ['數字順序 - STT', '客戶代號 MÃ KHÁCH HÀNG','客戶名称 TÊN KHÁCH HÀNG']},
+                            'textAlign': 'left'
                         },
-                        'backgroundColor': '#FFFF00',
-                    },
-                ],
-                style_cell={
-                    'padding': '5px',
-                    'minWidth': '80px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
-                },
-                
-                # Style the table header
-                style_header={
-                    'backgroundColor': '#C1FFC1',
-                    'fontWeight': 'bold',
-                    'font-color': 'white'
-                },
-                
-                # Remove or adjust spacing if needed
-                style_data={
-                    'whiteSpace': 'normal',  # Wrap text instead of adding extra space
-                    'height': 'auto',        # Allow the row height to adjust
-                    'lineHeight': '15px'     # Control line spacing
-                },
-
-            ),
-            
-        ], width=12)
-    ],style={'margin-top': '10px',"display": "block"},id='wh_customer_row_sales_increase'),
-
-
-    dbc.Row([
-        dbc.Col([
-            html.H2(id='wh_customer_title_sales_decrease'),
-            dash_table.DataTable(
-                id='wh_customer_table_sales_decrease',
-                #sort_action="native",
-                style_cell_conditional=[
-                    {
-                        'if': {'column_id': ['數字順序 - STT', '客戶代號 MÃ KHÁCH HÀNG','客戶名称 TÊN KHÁCH HÀNG']},
-                        'textAlign': 'left'
-                    },
-                    {
-                        'if': {
-                            'column_id': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
+                        {
+                            'if': {
+                                'column_id': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
+                            },
+                            'backgroundColor': '#FFFF00',
                         },
-                        'backgroundColor': '#FFFF00',
+                    ],
+                    style_cell={
+                        'padding': '5px',
+                        'minWidth': '80px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
                     },
-                ],
-                style_cell={
-                    'padding': '5px',
-                    'minWidth': '80px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
-                },
-                
-                # Style the table header
-                style_header={
-                    'backgroundColor': '#C1FFC1',
-                    'fontWeight': 'bold',
-                    'font-color': 'white'
-                },
-                
-                # Remove or adjust spacing if needed
-                style_data={
-                    'whiteSpace': 'normal',  # Wrap text instead of adding extra space
-                    'height': 'auto',        # Allow the row height to adjust
-                    'lineHeight': '15px'     # Control line spacing
-                },
-
-            ),
-            
-        ], width=12)
-    ],style={'margin-top': '10px',"display": "block"},id='wh_customer_row_sales_decrease'),
-
-
-
-
-
-    dbc.Row([
-        dbc.Col([
-            html.H2(id='wh_customer_title_order_increase'),
-            dash_table.DataTable(
-                id='wh_customer_table_order_increase',
-                #sort_action="native",
-                style_cell_conditional=[
-                    {
-                        'if': {'column_id': ['數字順序 - STT', '客戶代號 MÃ KHÁCH HÀNG','客戶名称 TÊN KHÁCH HÀNG']},
-                        'textAlign': 'left'
+                    
+                    # Style the table header
+                    style_header={
+                        'backgroundColor': '#C1FFC1',
+                        'fontWeight': 'bold',
+                        'font-color': 'white'
                     },
-                    {
-                        'if': {
-                            'column_id': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
+                    
+                    # Remove or adjust spacing if needed
+                    style_data={
+                        'whiteSpace': 'normal',  # Wrap text instead of adding extra space
+                        'height': 'auto',        # Allow the row height to adjust
+                        'lineHeight': '15px'     # Control line spacing
+                    },
+
+                ),
+                
+            ], width=12)
+        ],style={'margin-top': '10px',"display": "block"},id='wh_customer_row_sales_increase'),
+
+
+        dbc.Row([
+            dbc.Col([
+                html.H2(id='wh_customer_title_sales_decrease'),
+                dash_table.DataTable(
+                    id='wh_customer_table_sales_decrease',
+                    #sort_action="native",
+                    style_cell_conditional=[
+                        {
+                            'if': {'column_id': ['數字順序 - STT', '客戶代號 MÃ KHÁCH HÀNG','客戶名称 TÊN KHÁCH HÀNG']},
+                            'textAlign': 'left'
                         },
-                        'backgroundColor': '#FFFF00',
-                    },
-                ],
-                style_cell={
-                    'padding': '5px',
-                    'minWidth': '80px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
-                },
-                
-                # Style the table header
-                style_header={
-                    'backgroundColor': '#DFF2EB',
-                    'fontWeight': 'bold'
-                },
-                
-                # Remove or adjust spacing if needed
-                style_data={
-                    'whiteSpace': 'normal',  # Wrap text instead of adding extra space
-                    'height': 'auto',        # Allow the row height to adjust
-                    'lineHeight': '15px'     # Control line spacing
-                },
-
-            ),
-            
-        ], width=12)
-
-    ],style={'margin-top': '10px',"display": "none"},id='wh_customer_row_order_increase'),
-
-
-    dbc.Row([
-        dbc.Col([
-            html.H2(id='wh_customer_title_order_decrease'),
-            dash_table.DataTable(
-                id='wh_customer_table_order_decrease',
-                #sort_action="native",
-                style_cell_conditional=[
-                    {
-                        'if': {'column_id': ['數字順序 - STT', '客戶代號 MÃ KHÁCH HÀNG','客戶名称 TÊN KHÁCH HÀNG']},
-                        'textAlign': 'left'
-                    },
-                    {
-                        'if': {
-                            'column_id': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
+                        {
+                            'if': {
+                                'column_id': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
+                            },
+                            'backgroundColor': '#FFFF00',
                         },
-                        'backgroundColor': '#FFFF00',
+                    ],
+                    style_cell={
+                        'padding': '5px',
+                        'minWidth': '80px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
                     },
-                ],
-                style_cell={
-                    'padding': '5px',
-                    'minWidth': '80px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
-                },
+                    
+                    # Style the table header
+                    style_header={
+                        'backgroundColor': '#C1FFC1',
+                        'fontWeight': 'bold',
+                        'font-color': 'white'
+                    },
+                    
+                    # Remove or adjust spacing if needed
+                    style_data={
+                        'whiteSpace': 'normal',  # Wrap text instead of adding extra space
+                        'height': 'auto',        # Allow the row height to adjust
+                        'lineHeight': '15px'     # Control line spacing
+                    },
+
+                ),
                 
-                # Style the table header
-                style_header={
-                    'backgroundColor': '#DFF2EB',
-                    'fontWeight': 'bold'
-                },
+            ], width=12)
+        ],style={'margin-top': '10px',"display": "block"},id='wh_customer_row_sales_decrease'),
+
+
+
+
+
+        dbc.Row([
+            dbc.Col([
+                html.H2(id='wh_customer_title_order_increase'),
+                dash_table.DataTable(
+                    id='wh_customer_table_order_increase',
+                    #sort_action="native",
+                    style_cell_conditional=[
+                        {
+                            'if': {'column_id': ['數字順序 - STT', '客戶代號 MÃ KHÁCH HÀNG','客戶名称 TÊN KHÁCH HÀNG']},
+                            'textAlign': 'left'
+                        },
+                        {
+                            'if': {
+                                'column_id': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
+                            },
+                            'backgroundColor': '#FFFF00',
+                        },
+                    ],
+                    style_cell={
+                        'padding': '5px',
+                        'minWidth': '80px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
+                    },
+                    
+                    # Style the table header
+                    style_header={
+                        'backgroundColor': '#DFF2EB',
+                        'fontWeight': 'bold'
+                    },
+                    
+                    # Remove or adjust spacing if needed
+                    style_data={
+                        'whiteSpace': 'normal',  # Wrap text instead of adding extra space
+                        'height': 'auto',        # Allow the row height to adjust
+                        'lineHeight': '15px'     # Control line spacing
+                    },
+
+                ),
                 
-                # Remove or adjust spacing if needed
-                style_data={
-                    'whiteSpace': 'normal',  # Wrap text instead of adding extra space
-                    'height': 'auto',        # Allow the row height to adjust
-                    'lineHeight': '15px'     # Control line spacing
-                },
+            ], width=12)
 
-            ),
-            
-        ], width=12)
+        ],style={'margin-top': '10px',"display": "none"},id='wh_customer_row_order_increase'),
 
-    ],style={'margin-top': '10px',"display": "none"},id='wh_customer_row_order_decrease')
 
-], fluid=True)
+        dbc.Row([
+            dbc.Col([
+                html.H2(id='wh_customer_title_order_decrease'),
+                dash_table.DataTable(
+                    id='wh_customer_table_order_decrease',
+                    #sort_action="native",
+                    style_cell_conditional=[
+                        {
+                            'if': {'column_id': ['數字順序 - STT', '客戶代號 MÃ KHÁCH HÀNG','客戶名称 TÊN KHÁCH HÀNG']},
+                            'textAlign': 'left'
+                        },
+                        {
+                            'if': {
+                                'column_id': '数量差异 SỐ LƯỢNG CHÊNH LỆCH',
+                            },
+                            'backgroundColor': '#FFFF00',
+                        },
+                    ],
+                    style_cell={
+                        'padding': '5px',
+                        'minWidth': '80px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
+                    },
+                    
+                    # Style the table header
+                    style_header={
+                        'backgroundColor': '#DFF2EB',
+                        'fontWeight': 'bold'
+                    },
+                    
+                    # Remove or adjust spacing if needed
+                    style_data={
+                        'whiteSpace': 'normal',  # Wrap text instead of adding extra space
+                        'height': 'auto',        # Allow the row height to adjust
+                        'lineHeight': '15px'     # Control line spacing
+                    },
+
+                ),
+                
+            ], width=12)
+
+        ],style={'margin-top': '10px',"display": "none"},id='wh_customer_row_order_decrease')
+
+    ], fluid=True)
 
 @callback(
         

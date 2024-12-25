@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from extract import get_sales_same_month, get_order_same_month, get_text, get_color
 from transform import col_to_date
-from global_variable import max_sales_date
+from extract import get_max_sales_date
 import plotly.graph_objects as go
 import constants
 
@@ -22,68 +22,68 @@ first_date = today.replace(day=1)
 
 same_day_last_month = yesterday - relativedelta(months=1)
 same_day_last_month_fisrt = same_day_last_month.replace(day=1)
+def layout():
+    return dbc.Container([
+        dbc.Row([
+            dbc.Col([
+                html.H1('结论 KẾT LUẬN')
+            ], align='center'),
 
-layout = dbc.Container([
-    dbc.Row([
-        dbc.Col([
-            html.H1('结论 KẾT LUẬN')
-        ], align='center'),
-
-        dbc.Col([
-            html.H6(["選擇要比較的時間段", html.Br(),"Chọn khoảng thời gian để so sánh"]),
-            # Add DatePickerRange for target
-            dcc.DatePickerRange(
-            id='wh_conclusion_date_range_target',
-            start_date=same_day_last_month_fisrt,
-            end_date=same_day_last_month,
-            updatemode='bothdates',
-            display_format=constants.date_format,
-            )
-        ]),
-
-        dbc.Col([
-            html.H6(["本月", html.Br(), "Tháng hiện tại"]),
-            # Add DatePickerRange
-            dcc.DatePickerRange(
-            id='wh_conclusion_date_range',
-            start_date=first_date,
-            end_date=yesterday,
-            updatemode='bothdates',
-            display_format=constants.date_format,
-            )
-        ]),
-
-        dbc.Col([
-            dbc.Row([
-                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
+            dbc.Col([
+                html.H6(["選擇要比較的時間段", html.Br(),"Chọn khoảng thời gian để so sánh"]),
+                # Add DatePickerRange for target
+                dcc.DatePickerRange(
+                id='wh_conclusion_date_range_target',
+                start_date=same_day_last_month_fisrt,
+                end_date=same_day_last_month,
+                updatemode='bothdates',
+                display_format=constants.date_format,
+                )
             ]),
-            # dbc.Row([
-            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
-            # ])
-        ], width=2, class_name='update_note'),
-        
-    ], style={'padding':'5px'}, class_name='filter_panel'),
+
+            dbc.Col([
+                html.H6(["本月", html.Br(), "Tháng hiện tại"]),
+                # Add DatePickerRange
+                dcc.DatePickerRange(
+                id='wh_conclusion_date_range',
+                start_date=first_date,
+                end_date=yesterday,
+                updatemode='bothdates',
+                display_format=constants.date_format,
+                )
+            ]),
+
+            dbc.Col([
+                dbc.Row([
+                    html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {get_max_sales_date()}')
+                ]),
+                # dbc.Row([
+                #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+                # ])
+            ], width=2, class_name='update_note'),
+            
+        ], style={'padding':'5px'}, class_name='filter_panel'),
 
 
-    dbc.Row([
-        html.H3(id="wh_conclusion_title_order", className='conclusion-title'),
-        html.H5(id="wh_conclusion_text_order_no_timber", className='conclusion-title'),
-        html.H5(id="wh_conclusion_text_order", className='conclusion-title'),
-        html.H3(id="wh_conclusion_title_sales", className='conclusion-title'),
-        html.H5(id="wh_conclusion_text_sales_no_timber", className='conclusion-title'),
-        html.H5(id="wh_conclusion_text_sales", className='conclusion-title')
-    ]),
+        dbc.Row([
+            html.H3(id="wh_conclusion_title_order", className='conclusion-title'),
+            html.H5(id="wh_conclusion_text_order_no_timber", className='conclusion-title'),
+            html.H5(id="wh_conclusion_text_order", className='conclusion-title'),
+            html.H3(id="wh_conclusion_title_sales", className='conclusion-title'),
+            html.H5(id="wh_conclusion_text_sales_no_timber", className='conclusion-title'),
+            html.H5(id="wh_conclusion_text_sales", className='conclusion-title')
+        ]),
 
 
-    dbc.Row([
-        dbc.Col([], width=3), 
+        dbc.Row([
+            dbc.Col([], width=3), 
 
-        dbc.Col([
-            dcc.Graph(figure={}, id='wh_conclusion_graph')
-        ], width=8) 
-    ]),
+            dbc.Col([
+                dcc.Graph(figure={}, id='wh_conclusion_graph')
+            ], width=8) 
+        ]),
 
-])
+    ])
 
 
 

@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 
 import constants
 from extract import get_mtd_factory_sales,get_table_value, get_mtd_product, get_sales_all
-from global_variable import max_sales_date
+from extract import get_max_sales_date
 
 dash.register_page(__name__, path="/wh_product")
 
@@ -21,167 +21,167 @@ first_date = today.replace(day=1)
 same_day_last_month = yesterday - relativedelta(months=1)
 same_day_last_month_fisrt = same_day_last_month.replace(day=1)
 
+def layout():
+    return dbc.Container([
+        dbc.Row([
+            dbc.Col([
+                html.H2(id='wh_product_title')
+            ],width=3, align='center'),
 
-layout = dbc.Container([
-    dbc.Row([
-        dbc.Col([
-            html.H2(id='wh_product_title')
-        ],width=3, align='center'),
+            dbc.Col([
+                html.H6(["選擇要比較的時間段", html.Br(), "Chọn khoảng thời gian để so sánh"]),
+                # Add DatePickerRange for target
+                dcc.DatePickerRange(
+                id='wh_product_date_range_target',
+                start_date=same_day_last_month_fisrt,
+                end_date=same_day_last_month,
+                updatemode='bothdates',
+                display_format=constants.date_format,
 
-        dbc.Col([
-            html.H6(["選擇要比較的時間段", html.Br(), "Chọn khoảng thời gian để so sánh"]),
-            # Add DatePickerRange for target
-            dcc.DatePickerRange(
-            id='wh_product_date_range_target',
-            start_date=same_day_last_month_fisrt,
-            end_date=same_day_last_month,
-            updatemode='bothdates',
-            display_format=constants.date_format,
-
-            )
-        ]),
-
-        dbc.Col([
-            html.H6(["本月", html.Br(), "Tháng hiện tại"]),
-            # Add DatePickerRange
-            dcc.DatePickerRange(
-            id='wh_product_date_range',
-            start_date=first_date,
-            end_date=yesterday,
-            updatemode='bothdates',
-            display_format=constants.date_format,
-    
-            )
-        ]),
-
-        dbc.Col([
-            dbc.Row([
-                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
-            ]),
-            # dbc.Row([
-            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
-            # ])
-        ], width=2, class_name='update_note'),
-
-    ], style={'padding': '5px'}, class_name='filter_panel'),
-
-
-    dbc.Row([
-        dbc.Col([
-            dbc.Row([
-                dbc.Col([
-                    html.H5("数量差异 SỐ LƯỢNG CHÊNH LỆCH", style={'text-align':'center'}),
-                ])
+                )
             ]),
 
-            dbc.Row([
-                dbc.Col([
-                    dbc.RadioItems(
-                        id="wh_product_radios_sort",
-                        className="btn-group",
-                        inputClassName="btn-check",
-                        labelClassName="btn btn-outline-primary",
-                        labelCheckedClassName="active",
-                        options=[
-                            {"label": "增加↑↑ - Tăng↑↑", "value": "increase"},
-                            {"label": "減少↓↓ - Giảm↓↓", "value": "decrease"},
-                        ],
-                        value="increase",
-                    ),
-                ])
+            dbc.Col([
+                html.H6(["本月", html.Br(), "Tháng hiện tại"]),
+                # Add DatePickerRange
+                dcc.DatePickerRange(
+                id='wh_product_date_range',
+                start_date=first_date,
+                end_date=yesterday,
+                updatemode='bothdates',
+                display_format=constants.date_format,
+        
+                )
             ]),
 
-            dbc.Row([
-                dbc.Col([
-                    dash_table.DataTable(
-                        id='wh_product_table_sales_increase',
-                        #sort_action='native',
-                        style_cell={
-                            'height': 'auto',
-                            'width': '90px',
-                            'whiteSpace': 'normal'
-                        },
-                        style_data_conditional=[
-                            {
-                                "if": {"column_id": "数量差异 SỐ LƯỢNG CHÊNH LỆCH"}, 
-                                "backgroundColor": "#FFFF00",
-                                "pointerEvents": "none"  # Makes the row non-clickable
-                            }
-                        ]
-                    ),
-                ],id='wh_product_row_sales_increase'),
-                
+            dbc.Col([
+                dbc.Row([
+                    html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {get_max_sales_date()}')
+                ]),
+                # dbc.Row([
+                #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+                # ])
+            ], width=2, class_name='update_note'),
 
-                dbc.Col([
+        ], style={'padding': '5px'}, class_name='filter_panel'),
+
+
+        dbc.Row([
+            dbc.Col([
+                dbc.Row([
+                    dbc.Col([
+                        html.H5("数量差异 SỐ LƯỢNG CHÊNH LỆCH", style={'text-align':'center'}),
+                    ])
+                ]),
+
+                dbc.Row([
+                    dbc.Col([
+                        dbc.RadioItems(
+                            id="wh_product_radios_sort",
+                            className="btn-group",
+                            inputClassName="btn-check",
+                            labelClassName="btn btn-outline-primary",
+                            labelCheckedClassName="active",
+                            options=[
+                                {"label": "增加↑↑ - Tăng↑↑", "value": "increase"},
+                                {"label": "減少↓↓ - Giảm↓↓", "value": "decrease"},
+                            ],
+                            value="increase",
+                        ),
+                    ])
+                ]),
+
+                dbc.Row([
+                    dbc.Col([
                         dash_table.DataTable(
-                        id='wh_product_table_sales_decrease',
-                        #sort_action='native',
-                        style_cell={
-                            'height': 'auto',
-                            'width': '90px',
-                            'whiteSpace': 'normal'
-                        },
-                        style_data_conditional=[
-                            {
-                                "if": {"column_id": "数量差异 SỐ LƯỢNG CHÊNH LỆCH"}, 
-                                "backgroundColor": "#FFFF00",
-                                "pointerEvents": "none"  # Makes the row non-clickable
-                            }
-                        ]
-                    ),
-                ], id='wh_product_row_sales_decrease')
-            
-            ])
+                            id='wh_product_table_sales_increase',
+                            #sort_action='native',
+                            style_cell={
+                                'height': 'auto',
+                                'width': '90px',
+                                'whiteSpace': 'normal'
+                            },
+                            style_data_conditional=[
+                                {
+                                    "if": {"column_id": "数量差异 SỐ LƯỢNG CHÊNH LỆCH"}, 
+                                    "backgroundColor": "#FFFF00",
+                                    "pointerEvents": "none"  # Makes the row non-clickable
+                                }
+                            ]
+                        ),
+                    ],id='wh_product_row_sales_increase'),
+                    
 
-        ], width=3, style={
-                        'height': '500px',  # Set the height to create space for scrolling
-                        'overflowY': 'scroll',  # Enable vertical scrolling
-                        'borderRight': '1px solid #ddd',
-                        'margin-top': '25px'
-                        }),
-
-
-        dbc.Col([
-
-            dbc.Row([
-                dbc.Col([
-                    dcc.Graph(id='wh_product_graph_increase')
-                ], width=6),
-
-                dbc.Col([
-                    dcc.Graph(id='wh_product_graph_decrease')
-                ], width=6)
-            ], style={'padding-top':'20px'}),
-
-            dbc.Row([
-                dbc.Col([
-                    dcc.Graph(id='wh_product_graph_total')
+                    dbc.Col([
+                            dash_table.DataTable(
+                            id='wh_product_table_sales_decrease',
+                            #sort_action='native',
+                            style_cell={
+                                'height': 'auto',
+                                'width': '90px',
+                                'whiteSpace': 'normal'
+                            },
+                            style_data_conditional=[
+                                {
+                                    "if": {"column_id": "数量差异 SỐ LƯỢNG CHÊNH LỆCH"}, 
+                                    "backgroundColor": "#FFFF00",
+                                    "pointerEvents": "none"  # Makes the row non-clickable
+                                }
+                            ]
+                        ),
+                    ], id='wh_product_row_sales_decrease')
+                
                 ])
-            ]),
 
-            dbc.Row([
-                dbc.Button("產品詳情增加/減少 - Chi tiết SP tăng/giảm", id='wh_product_btn_detail', outline=True,
-                            color="info", className="me-1", n_clicks=0),
-            ]),
+            ], width=3, style={
+                            'height': '500px',  # Set the height to create space for scrolling
+                            'overflowY': 'scroll',  # Enable vertical scrolling
+                            'borderRight': '1px solid #ddd',
+                            'margin-top': '25px'
+                            }),
 
-            dbc.Row([
-                dash_table.DataTable(id='wh_product_table_detail',
-                                     style_cell={
-                                        'padding': '5px',
-                                        'minWidth': '60px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
-                                        },
-                                     style_data={
-                                        'whiteSpace': 'normal',  # Wrap text instead of adding extra space
-                                        'height': 'auto',        # Allow the row height to adjust
-                                        'lineHeight': '15px'     # Control line spacing
-                                        },
-                                     )
-            ], id='wh_product_row_detail', style={"display": "none"}),
 
-        ], width=9)
-    ])
+            dbc.Col([
 
-], fluid=True)
+                dbc.Row([
+                    dbc.Col([
+                        dcc.Graph(id='wh_product_graph_increase')
+                    ], width=6),
+
+                    dbc.Col([
+                        dcc.Graph(id='wh_product_graph_decrease')
+                    ], width=6)
+                ], style={'padding-top':'20px'}),
+
+                dbc.Row([
+                    dbc.Col([
+                        dcc.Graph(id='wh_product_graph_total')
+                    ])
+                ]),
+
+                dbc.Row([
+                    dbc.Button("產品詳情增加/減少 - Chi tiết SP tăng/giảm", id='wh_product_btn_detail', outline=True,
+                                color="info", className="me-1", n_clicks=0),
+                ]),
+
+                dbc.Row([
+                    dash_table.DataTable(id='wh_product_table_detail',
+                                        style_cell={
+                                            'padding': '5px',
+                                            'minWidth': '60px', 'maxWidth': '120px', 'whiteSpace': 'normal'  # Control column width
+                                            },
+                                        style_data={
+                                            'whiteSpace': 'normal',  # Wrap text instead of adding extra space
+                                            'height': 'auto',        # Allow the row height to adjust
+                                            'lineHeight': '15px'     # Control line spacing
+                                            },
+                                        )
+                ], id='wh_product_row_detail', style={"display": "none"}),
+
+            ], width=9)
+        ])
+
+    ], fluid=True)
 
 @callback(
     [Output('wh_product_table_sales_increase', 'data'),

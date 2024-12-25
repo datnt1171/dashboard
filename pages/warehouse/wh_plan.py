@@ -6,45 +6,45 @@ import pandas as pd
 from datetime import datetime
 
 from extract import get_factory_list, get_overall_sales, get_overall_planned
-from global_variable import max_sales_date
+from extract import get_max_sales_date
 
 dash.register_page(__name__, path="/wh_plan")
 
 
 factory_list = get_factory_list()
-layout = dbc.Container([
+def layout():
+    return dbc.Container([
+        dbc.Row([
 
-    dbc.Row([
+            dbc.Col([
+                html.H6("選擇客戶 - Chọn KH"),
+                dcc.Dropdown(id='wh_plan_dropdown_factory' ,
+                            options=factory_list['factory_name'], 
+                            value='大森 TIM BER',
+                            clearable=False,)
+            ], width=2),
 
-        dbc.Col([
-            html.H6("選擇客戶 - Chọn KH"),
-            dcc.Dropdown(id='wh_plan_dropdown_factory' ,
-                         options=factory_list['factory_name'], 
-                         value='大森 TIM BER',
-                         clearable=False,)
-        ], width=2),
-
-        dbc.Col([
-            html.H1(id='wh_plan_title', style={'text-align':'center'})
-        ]),
-
-        dbc.Col([
-            dbc.Row([
-                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
+            dbc.Col([
+                html.H1(id='wh_plan_title', style={'text-align':'center'})
             ]),
-            # dbc.Row([
-            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
-            # ])
-        ], width=2, class_name='update_note'),
-    ],style={'padding-top':'5px'}, class_name='filter_panel'),
 
-    dbc.Row([
-        dbc.Col([
-            dcc.Graph(figure={}, id='wh_plan_graph_percent')
-        ])
-    ]),
-   
-])
+            dbc.Col([
+                dbc.Row([
+                    html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {get_max_sales_date()}')
+                ]),
+                # dbc.Row([
+                #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+                # ])
+            ], width=2, class_name='update_note'),
+        ],style={'padding-top':'5px'}, class_name='filter_panel'),
+
+        dbc.Row([
+            dbc.Col([
+                dcc.Graph(figure={}, id='wh_plan_graph_percent')
+            ])
+        ]),
+    
+    ])
 
 @callback(
     Output('wh_plan_title','children'),

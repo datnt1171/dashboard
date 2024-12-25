@@ -125,7 +125,7 @@ def save_uploaded_order(contents, filename, last_modified):
     if contents is not None:
         return process_upload_data(contents, filename, last_modified, constants.wh_data_folder_order)
 
-    return dbc.Alert("No file uploaded yet.", color="info")
+    return dbc.Alert("Chưa có file được tải lên", color="info")
 
 #Upload sales data
 @callback(
@@ -138,7 +138,7 @@ def save_uploaded_order(contents, filename, last_modified):
     if contents is not None:
         return process_upload_data(contents, filename, last_modified, constants.wh_data_folder_sales)
 
-    return dbc.Alert("No file uploaded yet.", color="info")
+    return dbc.Alert("Chưa có file được tải lên", color="info")
 
 
 #Show order and sales table
@@ -149,7 +149,8 @@ def save_uploaded_order(contents, filename, last_modified):
      Output('wh_data_table_sales','columns')],
 
     [Input('wh_data_date_range','start_date'),
-     Input('wh_data_date_range','end_date')]
+     Input('wh_data_date_range','end_date')],
+     prevent_initial_call=True,
 )
 
 def load_data(start_date, end_date):
@@ -167,7 +168,8 @@ def load_data(start_date, end_date):
     Output('wh_data_download_btn_order', 'data'),
     Input('wh_data_download_order', 'n_clicks'),
     [State('wh_data_table_order', 'data'),
-     State('wh_data_table_order', 'columns')]
+     State('wh_data_table_order', 'columns')],
+     prevent_initial_call=True,
 )
 def download_order_data(n_clicks, table_data, table_columns):
     if n_clicks:
@@ -183,7 +185,8 @@ def download_order_data(n_clicks, table_data, table_columns):
     Output('wh_data_download_btn_sales', 'data'),
     Input('wh_data_download_sales', 'n_clicks'),
     [State('wh_data_table_sales', 'data'),
-     State('wh_data_table_sales', 'columns')]
+     State('wh_data_table_sales', 'columns'),],
+     prevent_initial_call=True,
 )
 def download_sales_data(n_clicks, table_data, table_columns):
     if n_clicks:

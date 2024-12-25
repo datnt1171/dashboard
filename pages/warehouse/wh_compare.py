@@ -6,7 +6,7 @@ import pandas as pd
 
 import constants
 from extract import  get_overall_sales, get_factory_list, get_product_list
-from global_variable import max_sales_date
+from extract import get_max_sales_date
 
 # Get data
 
@@ -15,97 +15,98 @@ dash.register_page(__name__, path="/wh_compare")
 
 factory_list = get_factory_list()
 product_list = get_product_list()
-layout = dbc.Container([
-    dbc.Row([
-        dbc.Col([],width=3),
-        dbc.Col([
-            html.H2("按年份比較交貨 - So sánh SL giao hàng theo từng năm"),
-        ]),
-        
-        dbc.Col([
-            dbc.Row([
-                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
+def layout():
+    return dbc.Container([
+        dbc.Row([
+            dbc.Col([],width=3),
+            dbc.Col([
+                html.H2("按年份比較交貨 - So sánh SL giao hàng theo từng năm"),
             ]),
-            # dbc.Row([
-            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
-            # ])
-        ], width=2, class_name='update_note'),
-    ], class_name='filter_panel'),
-
-    dbc.Row([
-        dbc.Col([
-            dbc.Row([
-                html.H6("選擇客戶 - Chọn KH"),
-                dcc.Dropdown(id='wh_compare_dropdown_factory',
-                                options=factory_list['factory_name'].unique().tolist() + ['全部 - Tất cả'], 
-                                value='全部 - Tất cả',
-                                clearable=False,)
-            ], style={'padding': "60px 0px 10px 0px"}),
-
-            dbc.Row([
-                html.H6("選擇產品 - Chọn SP"),
-                dcc.Dropdown(id='wh_compare_dropdown_product',
-                                options=product_list['product_name'].unique().tolist() + ['全部 - Tất cả'], 
-                                value='全部 - Tất cả',
-                                clearable=False,)
-            ], style= {'padding-bottom': '10px'}),
-
-            # dbc.Row([
-            #     html.H6("Bán hàng/Đặt hàng"),
-            #     dcc.Checklist(id='checklist_sales_order',
-            #              options=[
-            #                 {'label': 'Sales', 'value': 'sales'},
-            #                 {'label': 'Order', 'value': 'order'},
-            #                 ],
-            #              value=['sales'],
-            #              inline=True),
-            # ]),
-
-            dbc.Row([
-                html.H6("選擇年份 - Chọn năm"),
-                dcc.Dropdown(id='wh_compare_dropdown_year',
-                          options=constants.LIST_YEAR,
-                          value=[2024,2023],
-                          multi=True,
-                          clearable=False
-                )
-            ], style= {'padding-bottom': '10px'}),
-
-            dbc.Row([
-                html.H6('分組依據 - Nhóm theo'),
-                dcc.Dropdown(
-                    id="wh_compare_dropdown_groupby",
-                    options=[
-                        {"label": "四分之一 Quý", "value": "quarter"},
-                        {"label": "月 Tháng", "value": "month"},
-                        {"label": "星期 Tuần", "value": "week_of_year"},
-                        {"label": "天 Ngày", "value": "day_of_year"},
-                    ],
-                    value="month",
-                    clearable=False
-                ),
-            ], style= {'padding-bottom': '10px'}),
-
-
-
-        ], id='wh_compare_sidebar', width=2),
-
-
-        dbc.Col([
-            dbc.Row([
-                dcc.Graph(figure={}, id='wh_compare_timeseries')
-            ]),
-
-            # dbc.Row([
-            #     dcc.Graph(figure={}, id='line_by_time_concat')
-            # ])
             
-        ], width=10),
+            dbc.Col([
+                dbc.Row([
+                    html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {get_max_sales_date()}')
+                ]),
+                # dbc.Row([
+                #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+                # ])
+            ], width=2, class_name='update_note'),
+        ], class_name='filter_panel'),
+
+        dbc.Row([
+            dbc.Col([
+                dbc.Row([
+                    html.H6("選擇客戶 - Chọn KH"),
+                    dcc.Dropdown(id='wh_compare_dropdown_factory',
+                                    options=factory_list['factory_name'].unique().tolist() + ['全部 - Tất cả'], 
+                                    value='全部 - Tất cả',
+                                    clearable=False,)
+                ], style={'padding': "60px 0px 10px 0px"}),
+
+                dbc.Row([
+                    html.H6("選擇產品 - Chọn SP"),
+                    dcc.Dropdown(id='wh_compare_dropdown_product',
+                                    options=product_list['product_name'].unique().tolist() + ['全部 - Tất cả'], 
+                                    value='全部 - Tất cả',
+                                    clearable=False,)
+                ], style= {'padding-bottom': '10px'}),
+
+                # dbc.Row([
+                #     html.H6("Bán hàng/Đặt hàng"),
+                #     dcc.Checklist(id='checklist_sales_order',
+                #              options=[
+                #                 {'label': 'Sales', 'value': 'sales'},
+                #                 {'label': 'Order', 'value': 'order'},
+                #                 ],
+                #              value=['sales'],
+                #              inline=True),
+                # ]),
+
+                dbc.Row([
+                    html.H6("選擇年份 - Chọn năm"),
+                    dcc.Dropdown(id='wh_compare_dropdown_year',
+                            options=constants.LIST_YEAR,
+                            value=[2024,2023],
+                            multi=True,
+                            clearable=False
+                    )
+                ], style= {'padding-bottom': '10px'}),
+
+                dbc.Row([
+                    html.H6('分組依據 - Nhóm theo'),
+                    dcc.Dropdown(
+                        id="wh_compare_dropdown_groupby",
+                        options=[
+                            {"label": "四分之一 Quý", "value": "quarter"},
+                            {"label": "月 Tháng", "value": "month"},
+                            {"label": "星期 Tuần", "value": "week_of_year"},
+                            {"label": "天 Ngày", "value": "day_of_year"},
+                        ],
+                        value="month",
+                        clearable=False
+                    ),
+                ], style= {'padding-bottom': '10px'}),
 
 
-    ]),
 
-], fluid=True)
+            ], id='wh_compare_sidebar', width=2),
+
+
+            dbc.Col([
+                dbc.Row([
+                    dcc.Graph(figure={}, id='wh_compare_timeseries')
+                ]),
+
+                # dbc.Row([
+                #     dcc.Graph(figure={}, id='line_by_time_concat')
+                # ])
+                
+            ], width=10),
+
+
+        ]),
+
+    ], fluid=True)
 
 @callback(
     [Output('wh_compare_timeseries','figure'),

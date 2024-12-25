@@ -7,64 +7,63 @@ from datetime import datetime
 from extract import get_overall_order, get_overall_sales, extract_order_target, extract_sales_target
 from transform import col_to_date, filter_selected_day
 from plot_fig import plot_sales_order_target
-from global_variable import max_sales_date
+from extract import get_max_sales_date
 import constants
 
 
 dash.register_page(__name__, path="/wh_overall")
 
+def layout():
+    return dbc.Container([
+        dbc.Row([
+            dbc.Col([
+                dbc.Row([
+                    html.H6("選擇日期範圍 - Chọn khoảng thời gian"), #Select day range
+                    # Add RangeSlider
+                    dcc.RangeSlider(1, 31, 1,
+                                    value=[1, get_max_sales_date().day], 
+                                    id='wh_overall_day_slicer',
+                                    marks={i: {'label': str(i), 'style': {'color': 'gray' if i > get_max_sales_date().day else 'black'}} for i in range(1, 32)},),
+                ]),
+            ], width=5),
 
-layout = dbc.Container([
-    dbc.Row([
+            dbc.Col([
+                html.H6("目標月份 - Tháng mục tiêu"), #Target month
+                dcc.Dropdown(options=constants.LIST_MONTH, # Month Option
+                            value=5,
+                            id='wh_overall_target_month',
+                            clearable=False),
+            ], width=2),
 
-        dbc.Col([
-            dbc.Row([
-                html.H6("選擇日期範圍 - Chọn khoảng thời gian"), #Select day range
-                # Add RangeSlider
-                dcc.RangeSlider(1, 31, 1,
-                                value=[1, max_sales_date.day], 
-                                id='wh_overall_day_slicer',
-                                marks={i: {'label': str(i), 'style': {'color': 'gray' if i > max_sales_date.day else 'black'}} for i in range(1, 32)},),
-            ]),
-        ], width=5),
+            dbc.Col([
+                html.H6("目標年 - Năm mục tiêu"), #Target Year 
+                dcc.Dropdown(options=constants.LIST_YEAR, # Year Option
+                            value=2022,
+                            id='wh_overall_target_year',
+                            clearable=False)
+            ], width=2),
 
-        dbc.Col([
-            html.H6("目標月份 - Tháng mục tiêu"), #Target month
-            dcc.Dropdown(options=constants.LIST_MONTH, # Month Option
-                         value=5,
-                         id='wh_overall_target_month',
-                         clearable=False),
-        ], width=2),
+            dbc.Col([
+                dbc.Row([
+                    html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {get_max_sales_date()}')
+                ]),
+                # dbc.Row([
+                #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
+                # ])
+            ], width=2, class_name='update_note', align='right'),
 
-        dbc.Col([
-            html.H6("目標年 - Năm mục tiêu"), #Target Year 
-            dcc.Dropdown(options=constants.LIST_YEAR, # Year Option
-                         value=2022,
-                         id='wh_overall_target_year',
-                         clearable=False)
-        ], width=2),
+        ], style={'padding':'5px'}, class_name='filter_panel'),
+        
+        dbc.Row([
+            html.H2(id='wh_overall_title_tw'),
+            html.H2(id='wh_overall_title_vn'),
+        ], style={'padding-top':'10px'}),
 
-        dbc.Col([
-            dbc.Row([
-                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
-            ]),
-            # dbc.Row([
-            #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
-            # ])
-        ], width=2, class_name='update_note', align='right'),
+        dbc.Row([
+            html.Img(id='wh_overall_bar')
+        ]),
 
-    ], style={'padding':'5px'}, class_name='filter_panel'),
-    
-    dbc.Row([
-        html.H2(id='wh_overall_title_tw'),
-        html.H2(id='wh_overall_title_vn'),
-    ], style={'padding-top':'10px'}),
-
-    dbc.Row([
-        html.Img(id='wh_overall_bar')
-    ]),
-
-])
+    ])
 
 
 

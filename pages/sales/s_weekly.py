@@ -7,12 +7,12 @@ import numpy as np
 
 import constants
 from extract import  get_overall_sales, get_factory_list
-from global_variable import max_sales_date
 dash.register_page(__name__, path="/s_weekly")
 
 
 factory_list = get_factory_list()
-layout = dbc.Container([
+def layout():
+    return dbc.Container([
     dbc.Row([
         dbc.Col([
                 html.H6("選擇客戶 - Chọn KH"),
@@ -26,12 +26,7 @@ layout = dbc.Container([
             html.H2("按月收入 - Doanh thu theo từng tháng"),
         ]),
         
-        dbc.Col([
-            dbc.Row([
-                html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {max_sales_date}')
-            ]),
 
-        ], width=2, class_name='update_note'),
     ], class_name='filter_panel'),
 
     dbc.Row([
