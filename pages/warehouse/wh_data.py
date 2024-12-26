@@ -155,9 +155,19 @@ def save_uploaded_order(contents, filename, last_modified):
 
 def load_data(start_date, end_date):
     df_order = get_all_row_order(start_date, end_date)
+    df_order.columns = ['Ngày ĐĐH','Mã ĐĐH','Ngày CT','Mã KH','Mã ĐĐH của KH',
+                        'Loại thuế','Bộ phận','NVBH','Tỉ lệ trả trước','Mã đăng ký thanh toán',
+                        'Tên đăng ký thanh toán','địa chỉ GH','Mã SP','Tên SP','QC','Loại kho',
+                        'SL ĐĐH','SL ĐĐH đã giao','SL đóng gói ĐĐH','SL đóng gói ĐĐH đã giao',
+                        'Đơn vị','Đơn vị đóng gói','Thời gian dự định GH','Thời gian dự định GH ban đầu',
+                        'CT trước','Mã kết thúc','import_timestamp','import_wh_timestamp']
     df_order_columns=[{"name": i, 'id': i} for i in df_order.columns]
 
     df_sales = get_all_row_sales(start_date, end_date)
+    df_sales.columns = ['Mã SP','Tên SP','QC','Mã KH','Ngày GH','Mã GH',
+                        'Mã ĐĐH','SL GH','Đơn vị','SL đóng gói','Đơn vị đóng gói',
+                        'Bộ phận','NVBH','Mã kho','Loại kho','Mã nhập kho','Mã ĐĐH của KH',
+                        'import_timestamp','import_wh_timestamp']
     df_sales_columns=[{"name": i, 'id': i} for i in df_sales.columns]
 
     return [df_order.to_dict('records'), df_order_columns,

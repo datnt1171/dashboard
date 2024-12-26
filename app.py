@@ -143,6 +143,7 @@ def render_navbar(n_intervals):
                         children=[
                             dbc.DropdownMenuItem("Daily Report", href="/s_daily", disabled=disable_page('s_daily',permissions)),
                             dbc.DropdownMenuItem("Weekly Report", href="/s_weekly", disabled=disable_page('s_weekly',permissions)),
+                            dbc.DropdownMenuItem("Quy Trình", href="/s_systemsheet", disabled=disable_page('s_systemsheet',permissions)),
                             
                         ],
                         nav=True,
