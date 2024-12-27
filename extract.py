@@ -482,7 +482,9 @@ def get_all_row_order(start_date, end_date):
                             , host=database_host, port=database_port)
     cur = conn.cursor()
 
-    cur.execute("""SELECT * from fact_order
+    cur.execute("""SELECT * 
+                FROM fact_order o join dim_factory f
+                ON o.factory_code = f.factory_code
                 WHERE order_date BETWEEN %(start_date)s AND %(end_date)s""",
                 {'start_date': start_date, 'end_date': end_date})
     
@@ -497,7 +499,9 @@ def get_all_row_sales(start_date, end_date):
                             , host=database_host, port=database_port)
     cur = conn.cursor()
 
-    cur.execute("""SELECT * from fact_sales
+    cur.execute("""SELECT * 
+                FROM fact_sales s join dim_factory f
+                ON s.factory_code = f.factory_code
                 WHERE sales_date BETWEEN %(start_date)s AND %(end_date)s""",
                 {'start_date': start_date, 'end_date': end_date})
 

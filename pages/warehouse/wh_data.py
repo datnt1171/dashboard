@@ -160,14 +160,16 @@ def load_data(start_date, end_date):
                         'Tên đăng ký thanh toán','địa chỉ GH','Mã SP','Tên SP','QC','Loại kho',
                         'SL ĐĐH','SL ĐĐH đã giao','SL đóng gói ĐĐH','SL đóng gói ĐĐH đã giao',
                         'Đơn vị','Đơn vị đóng gói','Thời gian dự định GH','Thời gian dự định GH ban đầu',
-                        'CT trước','Mã kết thúc','import_timestamp','import_wh_timestamp']
+                        'CT trước','Mã kết thúc','import_timestamp','import_wh_timestamp','Mã KH 2','Tên KH']
+    df_order.drop(columns=['Mã KH 2'], inplace=True)
     df_order_columns=[{"name": i, 'id': i} for i in df_order.columns]
 
     df_sales = get_all_row_sales(start_date, end_date)
     df_sales.columns = ['Mã SP','Tên SP','QC','Mã KH','Ngày GH','Mã GH',
                         'Mã ĐĐH','SL GH','Đơn vị','SL đóng gói','Đơn vị đóng gói',
                         'Bộ phận','NVBH','Mã kho','Loại kho','Mã nhập kho','Mã ĐĐH của KH',
-                        'import_timestamp','import_wh_timestamp']
+                        'import_timestamp','import_wh_timestamp','Mã KH 2','Tên KH']
+    df_sales.drop(columns=['Mã KH 2'], inplace=True)
     df_sales_columns=[{"name": i, 'id': i} for i in df_sales.columns]
 
     return [df_order.to_dict('records'), df_order_columns,
