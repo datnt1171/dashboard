@@ -16,25 +16,26 @@ h2, h3, h4 {
 .navbar-brand {
     font-size: 24px; /* Larger font size for the brand */
     font-weight: bold; /* Bold brand text */
-    color: #fff4f4; /* Blue color for the brand */
+    color: #ffffff; /* Blue color for the brand */
 }
 
 .left-side-navbar {
     align-items: center; /* Vertically align items to the center */
 }
 
-.navbar-brand:hover {
-    color: #ffffff; /* Darker blue on hover */
-}
+/* .navbar-brand:hover {
+    color: #ffffff; 
+}*/
 
 .navbar .nav-link {
-    font-size: 18px; /* Font size for the links */
-    color: #ffffff !important; /* Dark gray text */
+    font-size: 18px; 
+    color: #ffffff !important; 
 }
 
+/*
 .navbar .nav-link:hover {
-    color: #ffffff; /* Blue color on hover */
-}
+    color: #ffffff; 
+} */
 
 .navbar .dropdown-menu {
     font-size: 16px; /* Font size for dropdown items */
