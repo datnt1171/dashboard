@@ -7,6 +7,7 @@ from datetime import datetime
 
 from extract import get_factory_list, get_overall_sales, get_overall_planned
 from extract import get_max_sales_date
+import constants
 
 dash.register_page(__name__, path="/wh_plan")
 
@@ -22,6 +23,14 @@ def layout():
                             options=factory_list['factory_name'], 
                             value='大森 TIM BER',
                             clearable=False,)
+            ], width=2),
+
+            dbc.Col([
+                html.H6("今年 - Năm hiện tại"), #Target Year 
+                dcc.Dropdown(options=constants.LIST_YEAR, # Year Option
+                            value=2025,
+                            id='wh_plan_current_year',
+                            clearable=False)
             ], width=2),
 
             dbc.Col([
@@ -56,15 +65,16 @@ def update_title(factory_name):
 
 @callback(
     [Output('wh_plan_graph_percent', 'figure'),],
-    [Input('wh_plan_dropdown_factory', 'value')]
+    [Input('wh_plan_dropdown_factory', 'value'),
+     Input('wh_plan_current_year','value')]
 )
 
-def update_bar_plan(factory_name):
+def update_bar_plan(factory_name, current_year):
 
     # Get sales
-    df_sales = get_overall_sales(datetime.today().date().year)
+    df_sales = get_overall_sales(current_year)
     # Get planned deliveries
-    df_plan = get_overall_planned(datetime.today().date().year)
+    df_plan = get_overall_planned(current_year)
 
     # Preprocessing
     df_sales['sales_date'] = pd.to_datetime(df_sales['sales_date'])

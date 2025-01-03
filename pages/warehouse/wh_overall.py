@@ -25,7 +25,7 @@ def layout():
                                     id='wh_overall_day_slicer',
                                     marks={i: {'label': str(i), 'style': {'color': 'gray' if i > get_max_sales_date().day else 'black'}} for i in range(1, 32)},),
                 ]),
-            ], width=5),
+            ], width=4),
 
             dbc.Col([
                 html.H6("目標月份 - Tháng mục tiêu"), #Target month
@@ -44,13 +44,21 @@ def layout():
             ], width=2),
 
             dbc.Col([
+                html.H6("今年 - Năm hiện tại"), #Target Year 
+                dcc.Dropdown(options=constants.LIST_YEAR, # Year Option
+                            value=2025,
+                            id='wh_overall_current_year',
+                            clearable=False)
+            ], width=2),
+
+            dbc.Col([
                 dbc.Row([
                     html.H6(f'更新資料到達 - Dữ liệu cập nhật đến ngày: {get_max_sales_date()}')
                 ]),
                 # dbc.Row([
                 #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
                 # ])
-            ], width=2, class_name='update_note', align='right'),
+            ], width=1, class_name='update_note', align='right'),
 
         ], style={'padding':'5px'}, class_name='filter_panel'),
         
@@ -63,7 +71,7 @@ def layout():
             html.Img(id='wh_overall_bar')
         ]),
 
-    ])
+    ], fluid=True)
 
 
 
@@ -75,16 +83,17 @@ def layout():
     
     [Input('wh_overall_day_slicer','value'),
      Input('wh_overall_target_month','value'),
-     Input('wh_overall_target_year','value')]
+     Input('wh_overall_target_year','value'),
+     Input('wh_overall_current_year','value')]
 )
 
-def update_bar_sales(day_range, target_month, target_year):
+def update_bar_sales(day_range, target_month, target_year, current_year):
     # Get data
     ## order_all
-    df_order = get_overall_order(datetime.today().date().year)
+    df_order = get_overall_order(current_year)
 
     ## sales_all
-    df_sales = get_overall_sales(datetime.today().date().year)
+    df_sales = get_overall_sales(current_year)
 
     ## order target
     order_target = extract_order_target(day_range, target_month, target_year)

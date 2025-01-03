@@ -16,12 +16,20 @@ dash.register_page(__name__, path="/wh_conclusion")
 
 
 
-today = datetime.today().date()
+# today = datetime.today().date()
+# yesterday = today - timedelta(days=1)
+# first_date = today.replace(day=1)
+
+# same_day_last_month = yesterday - relativedelta(months=1)
+# same_day_last_month_fisrt = same_day_last_month.replace(day=1)
+
+today = get_max_sales_date()
 yesterday = today - timedelta(days=1)
 first_date = today.replace(day=1)
 
 same_day_last_month = yesterday - relativedelta(months=1)
 same_day_last_month_fisrt = same_day_last_month.replace(day=1)
+
 def layout():
     return dbc.Container([
         dbc.Row([
