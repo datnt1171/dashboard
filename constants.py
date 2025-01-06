@@ -5,6 +5,9 @@ SALESMAN = ["林春松","董濤","許祥宜(Jackie)","陳佑群","陳國勇","�
 
 date_format = 'YYYY-MM-DD'
 
+EXCLUDE_FACTORY = '30673'
+
+# uploaded data folder
 #color_mixing
 cm_data_folder = 'data\cm'
 

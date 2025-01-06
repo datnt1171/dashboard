@@ -1,6 +1,9 @@
 import warnings
 warnings.filterwarnings("ignore") 
 import os
+from db import Database
+from dotenv import load_dotenv
+load_dotenv()
 
 # Dash
 import dash
@@ -13,12 +16,22 @@ url_for, render_template
 from flask_login import login_user, LoginManager, UserMixin, \
 logout_user, current_user
 
-# 
+# User
 from user import get_users
 df_user = get_users()
 VALID_USERNAME_PASSWORD = df_user.set_index('username').to_dict(orient="index")
 from utils.login_handler import disable_page
 
+# Database
+Database.initialize(
+    database=os.getenv('WAREHOUSE_NAME'),
+    user=os.getenv('WAREHOUSE_USER'),
+    password=os.getenv('WAREHOUSE_PASSWORD'),
+    host=os.getenv('WAREHOUSE_HOST'),
+    port=os.getenv('WAREHOUSE_PORT'),
+    minconn=1,
+    maxconn=20
+)
 # Exposing the Flask Server so that it can be configured for the login process:
 server = Flask(__name__)
 # Updating the Flask Server configuration with a secret key to encrypt 
@@ -99,6 +112,7 @@ def load_user(username):
 ####################################################################################
 app = dash.Dash(__name__, server=server, use_pages=True, suppress_callback_exceptions=False,
                 external_stylesheets=[dbc.themes.BOOTSTRAP])
+
 
 # Main Navbar for department selection
 @app.callback(
@@ -191,7 +205,7 @@ def serve_layout():
     return html.Div([
     html.Div(id='navbar'),
     page_container,
-    dcc.Interval(id='interval', interval=1 * 1000, max_intervals=1)  # Trigger layout loading once
+    dcc.Interval(id='interval', interval=1, max_intervals=1)  # Trigger layout loading once
 ])
 
 app.layout = serve_layout

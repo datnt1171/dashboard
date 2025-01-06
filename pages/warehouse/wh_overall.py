@@ -25,23 +25,23 @@ def layout():
                                     id='wh_overall_day_slicer',
                                     marks={i: {'label': str(i), 'style': {'color': 'gray' if i > get_max_sales_date().day else 'black'}} for i in range(1, 32)},),
                 ]),
-            ], width=4),
+            ], width=5),
 
             dbc.Col([
-                html.H6("目標月份 - Tháng mục tiêu"), #Target month
+                html.H6("目標月份"), #Target month
                 dcc.Dropdown(options=constants.LIST_MONTH, # Month Option
                             value=5,
                             id='wh_overall_target_month',
                             clearable=False),
-            ], width=2),
+            ], width=1),
 
             dbc.Col([
-                html.H6("目標年 - Năm mục tiêu"), #Target Year 
+                html.H6("目標年"), #Target Year 
                 dcc.Dropdown(options=constants.LIST_YEAR, # Year Option
                             value=2022,
                             id='wh_overall_target_year',
                             clearable=False)
-            ], width=2),
+            ], width=1),
 
             dbc.Col([
                 html.H6("今年 - Năm hiện tại"), #Target Year 
@@ -58,7 +58,7 @@ def layout():
                 # dbc.Row([
                 #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
                 # ])
-            ], width=1, class_name='update_note', align='right'),
+            ], width=2, class_name='update_note', align='right'),
 
         ], style={'padding':'5px'}, class_name='filter_panel'),
         
@@ -71,7 +71,7 @@ def layout():
             html.Img(id='wh_overall_bar')
         ]),
 
-    ], fluid=True)
+    ])
 
 
 
