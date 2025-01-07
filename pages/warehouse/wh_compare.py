@@ -1,11 +1,11 @@
 import dash
-from dash import html, dcc, callback, Input, Output
+from dash import html, dcc, callback, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 
 import constants
-from extract import  get_overall_sales, get_factory_list, get_product_list
+from extract import  get_factory_list, get_product_list, get_compare_sales_data
 from extract import get_max_sales_date
 
 # Get data
@@ -80,7 +80,7 @@ def layout():
                             {"label": "四分之一 Quý", "value": "quarter"},
                             {"label": "月 Tháng", "value": "month"},
                             {"label": "星期 Tuần", "value": "week_of_year"},
-                            {"label": "天 Ngày", "value": "day_of_year"},
+                            {"label": "天 Ngày", "value": "date"},
                         ],
                         value="month",
                         clearable=False
@@ -109,43 +109,22 @@ def layout():
     ], fluid=True)
 
 @callback(
-    [Output('wh_compare_timeseries','figure'),
-     ],
-    #Output('line_by_time_concat','figure')
-    [Input('wh_compare_dropdown_factory','value'),
-     Input('wh_compare_dropdown_product','value'),
-     #Input('checklist_sales_order','value'),
-     Input('wh_compare_dropdown_year','value'),
-     Input('wh_compare_dropdown_groupby','value'),
-     ]
+    Output('wh_compare_timeseries', 'figure'),
+    [
+        Input('wh_compare_dropdown_factory', 'value'),
+        Input('wh_compare_dropdown_product', 'value'),
+        Input('wh_compare_dropdown_year', 'value'),
+        Input('wh_compare_dropdown_groupby', 'value'),
+    ]
 )
 
 def update_line_chart(factory_name, product_name, list_year, time_groupby):
     if len(list_year)==0:
-        return [{}]#, {}] # Empty fig
+        return {}
 
-    df_sales = get_overall_sales(list_year)
-    df_sales = df_sales.merge(factory_list, on='factory_code', how='left')
-
-    if factory_name != '全部 - Tất cả':
-        df_sales = df_sales[df_sales['factory_name']==factory_name]
-    if product_name != '全部 - Tất cả':
-        df_sales = df_sales[df_sales['product_name']==product_name]
-
-
-    df_sales['sales_date'] = pd.to_datetime(df_sales['sales_date'])
-
-    # Stacked
-    df_sales['year'] = df_sales['sales_date'].dt.year
-    df_sales['quarter'] = df_sales['sales_date'].dt.quarter
-    df_sales['month'] = df_sales['sales_date'].dt.month
-    df_sales['week_of_year'] = df_sales['sales_date'].dt.isocalendar().week
-    df_sales['day_of_year'] = df_sales['sales_date'].dt.dayofyear
-    
-    
-
-    df_sales_stack = df_sales.groupby(["year",time_groupby]).agg({'sales_quantity':'sum'}).reset_index()
-    if time_groupby == 'day_of_year':
+    df_sales_stack = get_compare_sales_data(factory_name, product_name, list_year, time_groupby)
+    df_sales_stack.rename(columns={'agg_col':time_groupby}, inplace=True)
+    if time_groupby == 'date':
         sales_fig_stack = px.line(df_sales_stack,
                               x=time_groupby,
                               y='sales_quantity',
@@ -164,15 +143,15 @@ def update_line_chart(factory_name, product_name, list_year, time_groupby):
         )
         for trace in sales_fig_stack.data:
             trace["textfont"] = dict(color=trace["line"]["color"])  # Set text color to match line color
-        
-        sales_fig_stack.update_xaxes(
-            tickmode="linear",      # Set tick mode to linear for even spacing
-            dtick="M1"              # Set tick interval to 1 month
-        )
+    
+    sales_fig_stack.update_xaxes(
+        tickmode="linear",      # Set tick mode to linear for even spacing
+        dtick="M1"              # Set tick interval to 1 month
+    )
     x_axis_title_map = {"quarter": '四分之一 - Quý',
                         'month': '月 - Tháng',
                         'week_of_year': '星期 - Tuần',
-                        'day_of_year': '一年中的某一天 - Ngày trong năm'}
+                        'date': '天 - Ngày'}
     sales_fig_stack.update_layout(
     xaxis=dict(title=x_axis_title_map[time_groupby]),
     yaxis=dict(title="數量 - Số lượng",
@@ -180,42 +159,4 @@ def update_line_chart(factory_name, product_name, list_year, time_groupby):
     legend=dict(title="年 Năm")
 
     )
-    
-    # #Concat
-    # concat_map = {'quarter':'Q',
-    #               'month':'M',
-    #               'week_of_year':'W',
-    #               'day_of_year':'D'}
-    
-    # groupby = concat_map[time_groupby]
-    # df_sales['time_period'] = df_sales['sales_date'].dt.to_period(groupby)
-    # # Aggregate sales_quantity by month
-    # df_grouped = df_sales.groupby('time_period', as_index=False)['sales_quantity'].sum()
-
-    # # Convert period to datetime for Plotly compatibility
-    # df_grouped['time_period'] = df_grouped['time_period'].dt.to_timestamp()
-    # df_grouped['year'] = df_grouped['time_period'].dt.year
-
-    # # Create the line chart
-    # sales_fig_concat = px.line(
-    #     df_grouped,
-    #     x='time_period',
-    #     y='sales_quantity',
-    #     color='year',
-    #     # title='Monthly Sales Quantity Over Time',
-    #     # labels={'year_month': 'Month', 'sales_quantity': 'Sales Quantity'}
-    # )
-    
-
-    # if time_groupby != "day_of_year":
-    #     sales_fig_stack.update_xaxes(
-    #     tickmode="linear",
-    #     )
-    #     sales_fig_concat.update_xaxes(
-    #     tickformat="%m-%Y",     # Format to show month and year (e.g., "Jan 2021")
-    #     tickmode="linear",      # Set tick mode to linear for even spacing
-    #     dtick="M1"              # Set tick interval to 1 month
-    #     )
-
-
-    return [sales_fig_stack]#, sales_fig_concat]
+    return sales_fig_stack

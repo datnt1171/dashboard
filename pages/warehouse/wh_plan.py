@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
 
-from extract import get_factory_list, get_overall_sales, get_overall_planned
+from extract import get_factory_list, get_mtd_by_month, get_factory_code
 from extract import get_max_sales_date
 import constants
 
@@ -29,7 +29,7 @@ def layout():
                 html.H6("今年 - Năm hiện tại"), #Target Year 
                 dcc.Dropdown(options=constants.LIST_YEAR, # Year Option
                             value=2025,
-                            id='wh_plan_current_year',
+                            id='wh_plan_selected_year',
                             clearable=False)
             ], width=2),
 
@@ -66,42 +66,35 @@ def update_title(factory_name):
 @callback(
     [Output('wh_plan_graph_percent', 'figure'),],
     [Input('wh_plan_dropdown_factory', 'value'),
-     Input('wh_plan_current_year','value')]
+     Input('wh_plan_selected_year','value')]
 )
 
-def update_bar_plan(factory_name, current_year):
-
+def update_bar_plan(factory_name, selected_year):
+    factory_code = get_factory_code(factory_name)
     # Get sales
-    df_sales = get_overall_sales(current_year)
+    df_sales = get_mtd_by_month(selected_year, 1, 31, factory_code, "fact_sales", "sales_quantity", "sales_date")
+    df_sales.columns = ['month','sales_quantity','sales_quantity_timber']
+    df_sales.drop(columns = ['sales_quantity'], inplace=True)
+
     # Get planned deliveries
-    df_plan = get_overall_planned(current_year)
-
-    # Preprocessing
-    df_sales['sales_date'] = pd.to_datetime(df_sales['sales_date'])
-    df_plan['estimated_delivery_date'] = pd.to_datetime(df_plan['estimated_delivery_date'])
-
-    ## Join with factory_name to filter
-    df_sales = df_sales.merge(factory_list, on='factory_code', how='left')
-    df_plan = df_plan.merge(factory_list, on='factory_code', how='left')
-
-    ## Filter selected company
-    df_sales = df_sales[df_sales['factory_name']==factory_name]
-    df_plan = df_plan[df_plan['factory_name']==factory_name]
-
-    ## Sales
-    df_sales['month'] = df_sales['sales_date'].dt.month
-    df_sales_grouped = df_sales.groupby('month').agg({'sales_quantity': 'sum'}).reset_index()
-
-    ## Plan
-    df_plan['month'] = df_plan['estimated_delivery_date'].dt.month
-    df_plan_grouped = df_plan.groupby('month').agg({'order_quantity': 'sum'}).reset_index()
-
+    df_plan  = get_mtd_by_month(selected_year, 1, 31, factory_code, "fact_order", "order_quantity", "estimated_delivery_date")
+    df_plan.columns = ['month','plan_quantity','plan_quantity_timber']
+    df_plan.drop(columns = ['plan_quantity'], inplace=True)
 
     # Merge for plotting
-    df = df_sales_grouped.merge(df_plan_grouped, on='month', how='left')
+    df = df_sales.merge(df_plan, on='month', how='outer')
     df.columns = ['month','sales_quantity','plan_quantity']
 
-    df['percentage'] = df['sales_quantity'] / df['plan_quantity'] * 100
+    df.fillna(0,inplace=True)
+
+    df['percentage'] = df.apply(
+
+        lambda row: 100 if row['plan_quantity'] == 0 else 
+                    0 if row['sales_quantity'] == 0 else 
+                    (row['sales_quantity'] / row['plan_quantity'] * 100),
+        axis=1
+    )
+
     fig = go.Figure()
 
     # Add bars for estimated sales

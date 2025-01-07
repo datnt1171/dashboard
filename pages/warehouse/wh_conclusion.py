@@ -6,8 +6,7 @@ import numpy as np
 
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from extract import get_sales_same_month, get_order_same_month, get_text, get_color
-from transform import col_to_date
+from extract import get_sales_same_month, get_mtd_by_month, get_text, get_color
 from extract import get_max_sales_date
 import plotly.graph_objects as go
 import constants
@@ -123,47 +122,47 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
     start_date_target = datetime.strptime(start_date_target, '%Y-%m-%d')
     end_date_target = datetime.strptime(end_date_target, '%Y-%m-%d')
 
-    df_sales = get_sales_same_month(start_date, end_date, start_date_target, end_date_target)
-    df_sales = col_to_date(df_sales, ['sales_date','order_date'])
-    df_sales['is_same_month'] = np.where(df_sales['sales_date'].dt.month == df_sales['order_date'].dt.month, 'ĐĐH trong tháng', 'ĐĐH cũ')
-    df_sales['month'] = df_sales['sales_date'].dt.month
+    df_sales_same_month = get_sales_same_month(start_date, end_date, start_date_target, end_date_target)
+    df_sales_same_month = df_sales_same_month.pivot(index='month', columns='is_same_month', values='sum').reset_index()
+    df_sales_same_month = df_sales_same_month.rename_axis(None, axis=1).reset_index(drop=True)
 
-    df_sales_no_timber = df_sales[df_sales['factory_code'] != '30673']
-    df_sales_no_timber_grouped = df_sales_no_timber.groupby('month').agg({'sales_quantity':'sum'})
-    df_sales_no_timber_grouped['diff'] = df_sales_no_timber_grouped['sales_quantity'].diff()
-    df_sales_no_timber_grouped['pct_change'] = df_sales_no_timber_grouped['sales_quantity'].pct_change()
-
-    df_sales_grouped = df_sales.groupby('month').agg({'sales_quantity':'sum'})
-    df_sales_grouped['diff'] = df_sales_grouped['sales_quantity'].diff()
-    df_sales_grouped['pct_change'] = df_sales_grouped['sales_quantity'].pct_change()
-
-    df_order = get_order_same_month(start_date, end_date, start_date_target, end_date_target)
-    df_order = col_to_date(df_order, ['order_date'])
-    df_order['month'] = df_order['order_date'].dt.month
-
-    df_order_no_timber = df_order[df_order['factory_code'] != '30673']
-    df_order_no_timber_grouped = df_order_no_timber.groupby('month').agg({'order_quantity':'sum'})
-    df_order_no_timber_grouped['diff'] = df_order_no_timber_grouped['order_quantity'].diff()
-    df_order_no_timber_grouped['pct_change'] = df_order_no_timber_grouped['order_quantity'].pct_change()
-
-    df_order_grouped = df_order.groupby('month').agg({'order_quantity':'sum'}).reset_index()
-    df_order_grouped['diff'] = df_order_grouped['order_quantity'].diff()
-    df_order_grouped['pct_change'] = df_order_grouped['order_quantity'].pct_change()
-
-    df_same_month_grouped = df_sales.groupby(['month','is_same_month']).agg({'sales_quantity':'sum'}).reset_index()
-    df_same_month_grouped = df_same_month_grouped.pivot(index='month',
-                                                    columns='is_same_month',
-                                                    values='sales_quantity').reset_index()
-    df_all = df_same_month_grouped[['month','ĐĐH cũ','ĐĐH trong tháng']].merge(df_order_grouped[['month','order_quantity']],
-                                                                           on='month', how='left')
-    df_all['sales_quantity'] = df_all['ĐĐH cũ'] + df_all['ĐĐH trong tháng']
+    df_sales = get_mtd_by_month(start_date.year, 
+                                start_date.day, 
+                                end_date.day, 
+                                constants.EXCLUDE_FACTORY, 
+                                'fact_sales', 
+                                'sales_quantity',
+                                'sales_date')
     
-    for df in [df_order_no_timber_grouped, df_order_grouped, df_sales_no_timber_grouped, df_sales_grouped]:
-        df.fillna(0, inplace=True)
-    order_no_timber_pct_change = round(df_order_no_timber_grouped.iloc[-1,-1] * 100, 2)
-    order_pct_change = round(df_order_grouped.iloc[-1,-1] * 100, 2)
-    sales_no_timber_pct_change = round(df_sales_no_timber_grouped.iloc[-1,-1] * 100, 2)
-    sales_pct_change = round(df_sales_grouped.iloc[-1,-1] * 100, 2)
+    df_order = get_mtd_by_month(start_date.year, 
+                                start_date.day, 
+                                end_date.day, 
+                                constants.EXCLUDE_FACTORY, 
+                                'fact_order', 
+                                'order_quantity',
+                                'order_date')
+    
+    df_sales = df_sales[df_sales['month'].isin([start_date.month, start_date_target.month])]
+    df_order = df_order[df_order['month'].isin([start_date.month, start_date_target.month])]
+
+    df_sales.columns = ['month','sales_quantity','sales_quantity_timber']
+    df_order.columns = ['month','order_quantity','order_quantity_timber']
+
+    df_all = df_sales_same_month.merge(df_sales, how='outer', on='month').merge(df_order, how='outer', on='month')
+    df_all.fillna(0, inplace=True)
+
+    df_all['total_sales'] = df_all['sales_quantity'] + df_all['sales_quantity_timber']
+    df_all['total_order'] = df_all['order_quantity'] + df_all['order_quantity_timber']
+
+    df_all['pct_change_sales'] = df_all['total_sales'].pct_change()
+    df_all['pct_change_sales_exclude'] = df_all['sales_quantity'].pct_change()
+    df_all['pct_change_order'] = df_all['total_order'].pct_change()
+    df_all['pct_change_order_exclude'] = df_all['order_quantity'].pct_change()
+
+    order_no_timber_pct_change = round(df_all.loc[1,"pct_change_sales_exclude"] * 100, 2)
+    order_pct_change = round(df_all.loc[1,"pct_change_sales"] * 100, 2)
+    sales_no_timber_pct_change = round(df_all.loc[1,"pct_change_order_exclude"] * 100, 2)
+    sales_pct_change = round(df_all.loc[1,"pct_change_order"] * 100, 2)
 
     # Text
     order_title = f'{start_date.month}月分的订单量与{start_date_target.year} 年{start_date_target.month}月相比 \
@@ -215,11 +214,11 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
     fig.add_trace(
     go.Scatter(
         x=df_all["month"],
-        y=df_all["order_quantity"],
+        y=df_all["total_order"],
         name="總訂單 - Tổng SL ĐĐH",
         mode="lines+markers+text",
         line=dict(color="red", width=2),
-        text=df_all["order_quantity"].apply(lambda x: f"{x:,.0f}"),  # Add values as text
+        text=df_all["total_order"].apply(lambda x: f"{x:,.0f}"),  # Add values as text
         textposition='top right',
         textfont=dict(color="red")
     )
@@ -227,11 +226,11 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
     fig.add_trace(
         go.Scatter(
             x=df_all["month"],
-            y=df_all["sales_quantity"],
+            y=df_all["total_sales"],
             name="總銷售額 - Tổng SL Giao Hàng",
             mode="lines+markers+text",
             line=dict(color="green", width=2),
-            text=df_all["sales_quantity"].apply(lambda x: f"{x:,.0f}"),  # Add values as text
+            text=df_all["total_sales"].apply(lambda x: f"{x:,.0f}"),  # Add values as text
             textposition='top left',  # Adjust text position dynamically
             textfont=dict(color="green")
         )

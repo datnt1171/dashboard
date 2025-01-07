@@ -6,71 +6,56 @@ pd.options.mode.chained_assignment = None
 
 
 
-
-def get_overall_order(list_year):
-
-    if isinstance(list_year, int):
-        list_year = [list_year]
-
-    try:
-        conn = Database.get_connection()
-        with conn.cursor() as cur:
-            cur.execute("""SELECT order_date, factory_code, order_quantity, product_name, order_code
-                        FROM fact_order
-                        WHERE EXTRACT(YEAR FROM order_date) IN %(list_year)s
-                        """,
-                        {'list_year': tuple(list_year)})
-
-            data = cur.fetchall()
-            column_names = [description[0] for description in cur.description]
-            df = pd.DataFrame(data = data, columns = column_names)
-            return df
-    finally:
-        Database.return_connection(conn)
+def get_mtd_by_month(selected_year, start_day, end_day, exclude_factory, table_name, agg_col, date_col):
+    """
+    A generic function to fetch aggregated metrics (sales or orders) from the database.
     
+    Args:
+        selected_year (int): The year to filter.
+        start_day (int): The start day of the date range.
+        end_day (int): The end day of the date range.
+        exclude_factory (str): The factory to exclude.
+        table_name (str): The name of the table to query (e.g., 'fact_sales' or 'fact_order').
+        date_column (str): The date column to use for filtering (e.g., 'sales_date', 'order_date').
 
-
-def get_overall_sales(list_year):
-
-    if isinstance(list_year, int):
-        list_year = [list_year]
-    
+    Returns:
+        pd.DataFrame: A DataFrame with the aggregated data.
+    """
     try:
         conn = Database.get_connection()
         with conn.cursor() as cur:
-            cur.execute("""SELECT sales_date, factory_code, sales_quantity, product_name, order_code
-                        FROM fact_sales
-                        WHERE EXTRACT(YEAR FROM sales_date) IN %(list_year)s
-                        """,
-                        {'list_year': tuple(list_year)})
-
+            query = f"""
+                WITH filtered_dates AS (
+                    SELECT date, month
+                    FROM dim_date
+                    WHERE day BETWEEN %(start_day)s AND %(end_day)s
+                    AND year = %(selected_year)s
+                )
+                SELECT 
+                    d.month,
+                    SUM(CASE WHEN t.factory_code != %(exclude_factory)s THEN t.{agg_col} ELSE 0 END) AS sum_exclude,
+                    SUM(CASE WHEN t.factory_code = %(exclude_factory)s THEN t.{agg_col} ELSE 0 END) AS sum_factory
+                FROM {table_name} t
+                JOIN filtered_dates d
+                ON t.{date_col} = d.date
+                GROUP BY d.month
+                ORDER BY d.month;
+            """
+            cur.execute(query, {
+                'selected_year': selected_year,
+                'start_day': start_day,
+                'end_day': end_day,
+                'exclude_factory': exclude_factory
+            })
+            
             data = cur.fetchall()
             column_names = [description[0] for description in cur.description]
-            df = pd.DataFrame(data = data, columns = column_names)
+            df = pd.DataFrame(data=data, columns=column_names)
             return df
     finally:
         Database.return_connection(conn)
 
-def get_overall_planned(list_year):
 
-    if isinstance(list_year, int):
-        list_year = [list_year]
-
-    try:
-        conn = Database.get_connection()
-        with conn.cursor() as cur:
-            cur.execute("""SELECT estimated_delivery_date, factory_code, order_quantity, product_name
-                        FROM fact_order
-                        WHERE EXTRACT(YEAR FROM estimated_delivery_date) IN %(list_year)s
-                        """,
-                        {'list_year': tuple(list_year)})
-
-            data = cur.fetchall()
-            column_names = [description[0] for description in cur.description]
-            df = pd.DataFrame(data = data, columns = column_names)
-            return df
-    finally:
-        Database.return_connection(conn)
 
 
 def extract_order_target(day_range, target_month, target_year):
@@ -125,12 +110,6 @@ def extract_sales_target(day_range, target_month, target_year):
             return target
     finally:
         Database.return_connection(conn)
-
-
-
-
-
-
 
 ###############################################################
 ###############################################################
@@ -442,16 +421,40 @@ def get_product_list():
     finally:
         Database.return_connection(conn)
 
+def get_factory_code(factory_name):
+    try:
+        conn = Database.get_connection()
+        with conn.cursor() as cur:
+            cur.execute("""SELECT factory_code
+                        FROM dim_factory
+                        WHERE factory_name = %(factory_name)s
+                        LIMIT 1
+                        """,
+                        {'factory_name': factory_name})
+
+            return cur.fetchone()
+    finally:
+        Database.return_connection(conn)
 
 def get_sales_same_month(start_date, end_date, start_date_target, end_date_target):
     try:
         conn = Database.get_connection()
         with conn.cursor() as cur:
-            cur.execute("""SELECT sales_date, sales_quantity, order_date, s.factory_code
-                        FROM fact_sales s JOIN fact_order o 
-                        ON s.order_code = o.order_code
-                        WHERE sales_date BETWEEN %(start_date)s AND %(end_date)s
-                        OR sales_date BETWEEN %(start_date_target)s AND %(end_date_target)s""",
+            cur.execute("""SELECT d_sales.month, SUM(s.sales_quantity),
+                            CASE
+                                WHEN d_sales.month = d_order.month THEN 'ĐĐH trong tháng'
+                                ELSE 'ĐĐH cũ'
+                            END AS is_same_month
+                        FROM fact_sales s
+                        JOIN fact_order o
+                            ON s.order_code = o.order_code
+                        JOIN dim_date d_sales
+                            ON s.sales_date = d_sales.date
+                        JOIN dim_date d_order
+                            ON o.order_date = d_order.date
+                        WHERE d_sales.date BETWEEN %(start_date)s AND %(end_date)s
+                            OR d_sales.date BETWEEN %(start_date_target)s AND %(end_date_target)s
+                        GROUP BY d_sales.month, is_same_month""",
                         {'start_date':start_date, 'end_date':end_date,
                         'start_date_target':start_date_target, 'end_date_target':end_date_target})
             
@@ -463,24 +466,6 @@ def get_sales_same_month(start_date, end_date, start_date_target, end_date_targe
     finally:
         Database.return_connection(conn)
 
-def get_order_same_month(start_date, end_date, start_date_target, end_date_target):
-    try:
-        conn = Database.get_connection()
-        with conn.cursor() as cur:
-            cur.execute("""SELECT order_date, order_quantity, factory_code
-                        FROM fact_order
-                        WHERE order_date BETWEEN %(start_date)s AND %(end_date)s
-                        OR order_date BETWEEN %(start_date_target)s AND %(end_date_target)s""",
-                        {'start_date':start_date, 'end_date':end_date,
-                        'start_date_target':start_date_target, 'end_date_target':end_date_target})
-            
-            data = cur.fetchall()
-            column_names = [description[0] for description in cur.description]
-            df = pd.DataFrame(data = data, columns = column_names)
-
-            return df
-    finally:
-        Database.return_connection(conn)
 
 def get_color(value):
         return "green" if value > 0 else "red"
@@ -536,6 +521,54 @@ def get_all_row_sales(start_date, end_date):
                         ON s.factory_code = f.factory_code
                         WHERE sales_date BETWEEN %(start_date)s AND %(end_date)s""",
                         {'start_date': start_date, 'end_date': end_date})
+
+            data = cur.fetchall()
+            column_names = [description[0] for description in cur.description]
+            df = pd.DataFrame(data = data, columns = column_names)
+            return df
+    finally:
+        Database.return_connection(conn)
+
+def get_compare_sales_data(factory_name, product_name, list_year, time_groupby):
+    try:
+        conn = Database.get_connection()
+        with conn.cursor() as cur:
+            if factory_name == "全部 - Tất cả":
+                factory_filter = ""
+            else:
+                factory_filter = f"WHERE factory_name = '{factory_name}'"
+
+            if product_name == "全部 - Tất cả":
+                product_filter = ""
+            else:
+                product_filter = f"WHERE product_name = '{product_name}'"
+
+            query = f"""WITH filtered_factory AS (
+                    SELECT factory_code
+                    FROM dim_factory
+                    {factory_filter}
+                    ),
+                    filtered_product AS (
+                    SELECT product_code
+                    FROM dim_product
+                    {product_filter}
+                    ),
+                    filtered_date AS (
+                    SELECT date, {time_groupby} AS agg_col, year
+                    FROM dim_date
+                    WHERE year IN %(list_year)s
+                    )
+                    SELECT year, agg_col, SUM(sales_quantity) as sales_quantity
+                    FROM fact_sales s 
+                    JOIN filtered_factory f ON s.factory_code = f.factory_code
+                    JOIN filtered_product p ON s.product_code = p.product_code
+                    JOIN filtered_date d ON s.sales_date = d.date
+                    GROUP BY year, agg_col
+                    ORDER BY year, agg_col
+                    """
+            
+            cur.execute(query,
+                        {'list_year': tuple(list_year)})
 
             data = cur.fetchall()
             column_names = [description[0] for description in cur.description]
