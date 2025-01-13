@@ -5,10 +5,10 @@ from datetime import datetime, timedelta, date
 import calendar
 from dateutil.relativedelta import relativedelta
 
-from extract import get_mtd_factory_sales, get_mtd_factory_order, \
+from utils.query.wh.extract import get_mtd_factory_sales, get_mtd_factory_order, \
 get_planned_deliveries, get_total_sales, get_total_order
-from extract import get_max_sales_date
-import constants
+from utils.query.wh.extract import get_max_sales_date
+from utils import constants
 
 
 dash.register_page(__name__, path="/wh_customer")

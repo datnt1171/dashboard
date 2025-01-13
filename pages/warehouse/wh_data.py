@@ -6,8 +6,8 @@ import base64
 import io
 from datetime import datetime, timedelta
 import pandas as pd
-import constants
-from extract import get_all_row_order, get_all_row_sales
+from utils import constants
+from utils.query.wh.extract import get_all_row_order, get_all_row_sales
 
 dash.register_page(__name__, path="/wh_data")
 

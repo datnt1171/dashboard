@@ -1,7 +1,7 @@
 import pandas as pd
 import calendar
 from datetime import date
-from db import Database
+from utils.db import Database
 pd.options.mode.chained_assignment = None
 
 

@@ -3,10 +3,10 @@ from dash import html, dcc, callback, Input, Output
 import dash_bootstrap_components as dbc
 
 
-from extract import get_mtd_by_month, extract_order_target, extract_sales_target
-from plot_fig import plot_sales_order_target
-from extract import get_max_sales_date
-import constants
+from utils.query.wh.extract import get_mtd_by_month, extract_order_target, extract_sales_target
+from utils.plot_fig import plot_sales_order_target
+from utils.query.wh.extract import get_max_sales_date
+from utils import constants
 
 
 dash.register_page(__name__, path="/wh_overall")

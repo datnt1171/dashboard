@@ -4,9 +4,9 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 
-import constants
-from extract import  get_factory_list, get_product_list, get_compare_sales_data
-from extract import get_max_sales_date
+from utils import constants
+from utils.query.wh.extract import  get_factory_list, get_product_list, get_compare_sales_data
+from utils.query.wh.extract import get_max_sales_date
 
 # Get data
 

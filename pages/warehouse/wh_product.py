@@ -7,9 +7,9 @@ import plotly.express as px
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-import constants
-from extract import get_mtd_factory_sales,get_table_value, get_mtd_product, get_sales_all
-from extract import get_max_sales_date
+from utils import constants
+from utils.query.wh.extract import get_mtd_factory_sales,get_table_value, get_mtd_product, get_sales_all
+from utils.query.wh.extract import get_max_sales_date
 
 dash.register_page(__name__, path="/wh_product")
 

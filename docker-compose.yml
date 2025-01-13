@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  dash-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8050:8050"  # Map the container port to the host port
+    environment:
+      WAREHOUSE_NAME: DataWarehouse
+      WAREHOUSE_USER: postgres
+      WAREHOUSE_PASSWORD: lkjhgnhI1@
+      WAREHOUSE_HOST: postgres
+      WAREHOUSE_PORT: 5433
+      SECRET_KEY: vtV6k5ZMWm-bhf8zPAUEbg
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: DataWarehouse
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: lkjhgnhI1@
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

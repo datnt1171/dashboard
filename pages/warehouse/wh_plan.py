@@ -5,9 +5,9 @@ import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime
 
-from extract import get_factory_list, get_mtd_by_month, get_factory_code
-from extract import get_max_sales_date
-import constants
+from utils.query.wh.extract import get_factory_list, get_mtd_by_month, get_factory_code
+from utils.query.wh.extract import get_max_sales_date
+from utils import constants
 
 dash.register_page(__name__, path="/wh_plan")
 

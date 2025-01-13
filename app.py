@@ -1,7 +1,7 @@
 import warnings
 warnings.filterwarnings("ignore") 
 import os
-from db import Database
+from utils.db import Database
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -17,7 +17,7 @@ from flask_login import login_user, LoginManager, UserMixin, \
 logout_user, current_user
 
 # User
-from user import get_users
+from utils.user import get_users
 df_user = get_users()
 VALID_USERNAME_PASSWORD = df_user.set_index('username').to_dict(orient="index")
 from utils.login_handler import disable_page
@@ -211,4 +211,4 @@ def serve_layout():
 app.layout = serve_layout
 
 if __name__ == "__main__":
-    app.run_server(debug=True, host="0.0.0.0")
+    app.run_server(debug=True, host="0.0.0.0", port=8050)
