@@ -440,7 +440,7 @@ def get_sales_same_month(start_date, end_date, start_date_target, end_date_targe
     try:
         conn = Database.get_connection()
         with conn.cursor() as cur:
-            cur.execute("""SELECT d_sales.month, SUM(s.sales_quantity),
+            cur.execute("""SELECT d_sales.year, d_sales.month, SUM(s.sales_quantity),
                             CASE
                                 WHEN d_sales.month = d_order.month THEN 'ĐĐH trong tháng'
                                 ELSE 'ĐĐH cũ'
@@ -454,7 +454,7 @@ def get_sales_same_month(start_date, end_date, start_date_target, end_date_targe
                             ON o.order_date = d_order.date
                         WHERE d_sales.date BETWEEN %(start_date)s AND %(end_date)s
                             OR d_sales.date BETWEEN %(start_date_target)s AND %(end_date_target)s
-                        GROUP BY d_sales.month, is_same_month""",
+                        GROUP BY d_sales.year, d_sales.month, is_same_month""",
                         {'start_date':start_date, 'end_date':end_date,
                         'start_date_target':start_date_target, 'end_date_target':end_date_target})
             

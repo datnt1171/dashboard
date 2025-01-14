@@ -125,7 +125,7 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
 
     # Group by same month
     df_sales_same_month = get_sales_same_month(start_date, end_date, start_date_target, end_date_target)
-    df_sales_same_month = df_sales_same_month.pivot(index='month', columns='is_same_month', values='sum').reset_index()
+    df_sales_same_month = df_sales_same_month.pivot(index=['year','month'], columns='is_same_month', values='sum').reset_index()
     df_sales_same_month = df_sales_same_month.rename_axis(None, axis=1).reset_index(drop=True)
 
     # Selected
@@ -136,7 +136,7 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
                                 'fact_sales', 
                                 'sales_quantity',
                                 'sales_date')
-    
+
     df_order = get_mtd_by_month(start_date.year, 
                                 start_date.day, 
                                 end_date.day, 
@@ -144,6 +144,7 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
                                 'fact_order', 
                                 'order_quantity',
                                 'order_date')
+
     
     df_sales = df_sales[df_sales['month'] == start_date.month]
     df_order = df_order[df_order['month'] == start_date.month]
@@ -151,6 +152,7 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
     df_sales.columns = ['month','sales_quantity','sales_quantity_timber']
     df_order.columns = ['month','order_quantity','order_quantity_timber']
 
+    
     # Target
     df_sales_target = get_mtd_by_month(start_date_target.year, 
                                 start_date_target.day, 
@@ -159,7 +161,7 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
                                 'fact_sales', 
                                 'sales_quantity',
                                 'sales_date')
-    
+
     df_order_target = get_mtd_by_month(start_date_target.year, 
                                 start_date_target.day, 
                                 end_date_target.day, 
@@ -167,33 +169,37 @@ def update_bar_sales(start_date, end_date, start_date_target, end_date_target):
                                 'fact_order', 
                                 'order_quantity',
                                 'order_date')
-    
+
     df_sales_target = df_sales_target[df_sales_target['month'] == start_date_target.month]
     df_order_target = df_order_target[df_order_target['month'] == start_date_target.month]
 
     df_sales_target.columns = ['month','sales_quantity','sales_quantity_timber']
     df_order_target.columns = ['month','order_quantity','order_quantity_timber']
 
+    # Concat
     df_sales = pd.concat([df_sales,df_sales_target])
     df_order = pd.concat([df_order,df_order_target])
     df_all = df_sales_same_month.merge(df_sales, how='outer', on='month').merge(df_order, how='outer', on='month')
     df_all.fillna(0, inplace=True)
 
+
+    
     df_all['total_sales'] = df_all['sales_quantity'] + df_all['sales_quantity_timber']
     df_all['total_order'] = df_all['order_quantity'] + df_all['order_quantity_timber']
-    #### DIRTY CODE #### DIRTY CODE
-    df_all.sort_values(by='month', inplace=True, ascending=False)
+
+    df_all.sort_values(by=['year','month'], inplace=True)
     df_all['month'] = df_all['month'].astype('str')
-    #### DIRTY CODE #### DIRTY CODE
+    df_all.reset_index(drop=True, inplace=True)
+
     df_all['pct_change_sales'] = df_all['total_sales'].pct_change()
     df_all['pct_change_sales_exclude'] = df_all['sales_quantity'].pct_change()
     df_all['pct_change_order'] = df_all['total_order'].pct_change()
     df_all['pct_change_order_exclude'] = df_all['order_quantity'].pct_change()
 
-    order_no_timber_pct_change = round(df_all.loc[0,"pct_change_sales_exclude"] * 100, 2)
-    order_pct_change = round(df_all.loc[0,"pct_change_sales"] * 100, 2)
-    sales_no_timber_pct_change = round(df_all.loc[0,"pct_change_order_exclude"] * 100, 2)
-    sales_pct_change = round(df_all.loc[0,"pct_change_order"] * 100, 2)
+    order_no_timber_pct_change = round(df_all.loc[1,"pct_change_sales_exclude"] * 100, 2)
+    order_pct_change = round(df_all.loc[1,"pct_change_sales"] * 100, 2)
+    sales_no_timber_pct_change = round(df_all.loc[1,"pct_change_order_exclude"] * 100, 2)
+    sales_pct_change = round(df_all.loc[1,"pct_change_order"] * 100, 2)
 
     # Text
     order_title = f'{start_date.month}月分的订单量与{start_date_target.year} 年{start_date_target.month}月相比 \
