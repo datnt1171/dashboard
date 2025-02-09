@@ -117,6 +117,6 @@ def update_bar_sales(day_range, target_month, target_year, selected_year):
     df['sales_target%'] = df['sales_quantity'] / sales_target
     df['order_target%'] = df['order_quantity'] / order_target
     fig_bar_matplotlib = plot_sales_order_target(df, target_year, target_month)
-    title_tw = f"2024年每月送貨比较与{target_year}年{target_month}月相比 （每月{day_range[0]}日~{day_range[1]}日）"
+    title_tw = f"{selected_year}年每月送貨比较与{target_year}年{target_month}月相比 （每月{day_range[0]}日~{day_range[1]}日）"
     title_vn = f"SO SÁNH SỐ LƯỢNG GIAO HÀNG MỖI THÁNG SO VỚI THÁNG {target_month} NĂM {target_year}"
     return [fig_bar_matplotlib, title_tw, title_vn]

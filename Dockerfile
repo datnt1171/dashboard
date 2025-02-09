@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install -r requirements.txt
 
 # Expose the app's port
-# EXPOSE 8050
+EXPOSE 8050
 
 # Define the command to run the application
 CMD ["python", "app.py"]
