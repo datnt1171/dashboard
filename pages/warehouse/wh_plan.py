@@ -87,13 +87,7 @@ def update_bar_plan(factory_name, selected_year):
 
     df.fillna(0,inplace=True)
 
-    df['percentage'] = df.apply(
-
-        lambda row: 100 if row['plan_quantity'] == 0 else 
-                    0 if row['sales_quantity'] == 0 else 
-                    (row['sales_quantity'] / row['plan_quantity'] * 100),
-        axis=1
-    )
+    df['percentage'] = df['sales_quantity'] / df['plan_quantity'] * 100
 
     fig = go.Figure()
 
@@ -117,21 +111,21 @@ def update_bar_plan(factory_name, selected_year):
         textposition='outside'
     ))
 
-    # Add line for percentage (on secondary y-axis)
+    # Filter out rows where percentage is 0
+    df_filtered = df[df['percentage'] > 0]
+
+    # Add line for percentage (on secondary y-axis) only for non-zero values
     fig.add_trace(go.Scatter(
-        x=df['month'],
-        y=df['percentage'],
+        x=df_filtered['month'],
+        y=df_filtered['percentage'],
         name='%達到率 - %Tỉ lệ đại được',
         yaxis='y2',
         mode='lines+markers+text',
         marker=dict(color='red', size=10),
         line=dict(color='red'),
-        text=[f'{p:.1f}%' for p in df['percentage']],  # Display as percentage with 1 decimal
+        text=[f'{p:.1f}%' for p in df_filtered['percentage']],
         textposition='middle right',
-        textfont=dict(
-            size=14,       # Set font size
-            color='red'   # Set font color
-        )
+        textfont=dict(size=14, color='red')
     ))
 
     max_percentage = df['percentage'].max()

@@ -90,7 +90,7 @@ layout = dbc.Container([
             dcc.DatePickerRange(
             id='wh_data_date_range',
             start_date=first_date,
-            end_date=yesterday,
+            end_date=today,
             updatemode='bothdates',
             display_format=constants.date_format,
             )
