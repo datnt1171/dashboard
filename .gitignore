@@ -157,3 +157,4 @@ backup/
 *.ipynb
 test.ipynb
 db/
+run_app.bat

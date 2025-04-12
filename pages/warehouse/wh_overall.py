@@ -15,15 +15,33 @@ def layout():
     return dbc.Container([
         dbc.Row([
             dbc.Col([
+                html.H6("月 - Tháng", style={'padding-bottom': '10px'}), #Select month range
+                html.H6("天 - Ngày"), #Select day range
+            ], width=1),
+            dbc.Col([
+                #Select month range
                 dbc.Row([
-                    html.H6("選擇日期範圍 - Chọn khoảng thời gian"), #Select day range
-                    # Add RangeSlider
+                    dcc.RangeSlider(1, 12, 1,
+                                    value=[1, get_max_sales_date().month], 
+                                    id='wh_overall_month_slicer',
+                                    marks={i: {'label': str(i), 'style': {'color': 'gray' if i > get_max_sales_date().month else 'black'}} for i in range(1, 13)},),
+                ]),
+                #Select day range
+                dbc.Row([
                     dcc.RangeSlider(1, 31, 1,
                                     value=[1, get_max_sales_date().day], 
                                     id='wh_overall_day_slicer',
                                     marks={i: {'label': str(i), 'style': {'color': 'gray' if i > get_max_sales_date().day else 'black'}} for i in range(1, 32)},),
                 ]),
             ], width=5),
+
+            dbc.Col([
+                html.H6("今年 - Năm"), #Target Year 
+                dcc.Dropdown(options=constants.LIST_YEAR, # Year Option
+                            value=2025,
+                            id='wh_overall_selected_year',
+                            clearable=False)
+            ], width=1, style={'border-right': '1px solid #e0e0e0'}),
 
             dbc.Col([
                 html.H6("目標月份"), #Target month
@@ -41,13 +59,6 @@ def layout():
                             clearable=False)
             ], width=1),
 
-            dbc.Col([
-                html.H6("今年 - Năm hiện tại"), #Target Year 
-                dcc.Dropdown(options=constants.LIST_YEAR, # Year Option
-                            value=2025,
-                            id='wh_overall_selected_year',
-                            clearable=False)
-            ], width=2),
 
             dbc.Col([
                 dbc.Row([
@@ -80,12 +91,13 @@ def layout():
     ],
     
     [Input('wh_overall_day_slicer','value'),
+     Input('wh_overall_month_slicer','value'),
      Input('wh_overall_target_month','value'),
      Input('wh_overall_target_year','value'),
      Input('wh_overall_selected_year','value')]
 )
 
-def update_bar_sales(day_range, target_month, target_year, selected_year):
+def update_bar_sales(day_range, month_range, target_month, target_year, selected_year):
     # Get data
     ## order_all
     df_order = get_mtd_by_month(selected_year, 
@@ -96,6 +108,7 @@ def update_bar_sales(day_range, target_month, target_year, selected_year):
                                 "order_quantity", 
                                 "order_date")
     df_order.columns = ['month','order_quantity','order_quantity_timber']
+    df_order = df_order[(df_order['month'] >= month_range[0]) & (df_order['month'] <= month_range[1])]
     ## sales_all
     df_sales = get_mtd_by_month(selected_year, 
                                 day_range[0], 
@@ -105,6 +118,7 @@ def update_bar_sales(day_range, target_month, target_year, selected_year):
                                 "sales_quantity", 
                                 "sales_date")
     df_sales.columns = ['month','sales_quantity','sales_quantity_timber']
+    df_sales = df_sales[(df_sales['month'] >= month_range[0]) & (df_sales['month'] <= month_range[1])]
     ## order target
     order_target = extract_order_target(day_range, target_month, target_year)
 

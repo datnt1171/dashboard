@@ -25,7 +25,9 @@ def get_users():
              'color_mixing': ['cm_daily','cm_weekly','cm_qc'],
              'sales': ['s_daily','s_weekly','s_systemsheet'],
              'production': ['prod_daily','prod_weekly'],
-             'rd': ['rd_daily','rd_weekly']}
+             'rd': ['rd_daily','rd_weekly'],
+             'test': ['wh_overall', 'wh_customer' ,'wh_product','wh_plan','wh_compare','wh_conclusion',
+                       'cm_daily','cm_weekly','cm_qc',]}
     conn = psycopg2.connect(database=database_name, user=database_user, password=database_password
                             , host=database_host, port=database_port)
     cur = conn.cursor()
