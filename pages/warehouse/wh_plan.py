@@ -34,7 +34,7 @@ def layout():
             ], width=2),
 
             dbc.Col([
-                html.H1(id='wh_plan_title', style={'text-align':'center'})
+                html.H1(id='wh_plan_title', style={'textAlign':'center'})
             ]),
 
             dbc.Col([
@@ -45,7 +45,7 @@ def layout():
                 #     html.H6(f'更新於 - Cập nhật vào lúc: {max_import_wh_timestamp.date()}')
                 # ])
             ], width=2, class_name='update_note'),
-        ],style={'padding-top':'5px'}, class_name='filter_panel'),
+        ],style={'paddingTop':'5px'}, class_name='filter_panel'),
 
         dbc.Row([
             dbc.Col([

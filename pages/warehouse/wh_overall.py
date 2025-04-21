@@ -15,7 +15,7 @@ def layout():
     return dbc.Container([
         dbc.Row([
             dbc.Col([
-                html.H6("月 - Tháng", style={'padding-bottom': '10px'}), #Select month range
+                html.H6("月 - Tháng", style={'paddingBottom': '10px'}), #Select month range
                 html.H6("天 - Ngày"), #Select day range
             ], width=1),
             dbc.Col([
@@ -41,7 +41,7 @@ def layout():
                             value=2025,
                             id='wh_overall_selected_year',
                             clearable=False)
-            ], width=1, style={'border-right': '1px solid #e0e0e0'}),
+            ], width=1, style={'borderRight': '1px solid #e0e0e0'}),
 
             dbc.Col([
                 html.H6("目標月份"), #Target month
@@ -74,7 +74,7 @@ def layout():
         dbc.Row([
             html.H2(id='wh_overall_title_tw'),
             html.H2(id='wh_overall_title_vn'),
-        ], style={'padding-top':'10px'}),
+        ], style={'paddingTop':'10px'}),
 
         dbc.Row([
             html.Img(id='wh_overall_bar')

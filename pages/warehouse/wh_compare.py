@@ -49,7 +49,7 @@ def layout():
                                     options=product_list['product_name'].unique().tolist() + ['全部 - Tất cả'], 
                                     value='全部 - Tất cả',
                                     clearable=False,)
-                ], style= {'padding-bottom': '10px'}),
+                ], style= {'paddingBottom': '10px'}),
 
                 # dbc.Row([
                 #     html.H6("Bán hàng/Đặt hàng"),
@@ -70,7 +70,7 @@ def layout():
                             multi=True,
                             clearable=False
                     )
-                ], style= {'padding-bottom': '10px'}),
+                ], style= {'paddingBottom': '10px'}),
 
                 dbc.Row([
                     html.H6('分組依據 - Nhóm theo'),
@@ -85,7 +85,7 @@ def layout():
                         value="month",
                         clearable=False
                     ),
-                ], style= {'padding-bottom': '10px'}),
+                ], style= {'paddingBottom': '10px'}),
 
 
 

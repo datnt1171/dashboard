@@ -77,7 +77,7 @@ def layout():
             dbc.Col([
                 dbc.Row([
                     dbc.Col([
-                        html.H5("数量差异 SỐ LƯỢNG CHÊNH LỆCH", style={'text-align':'center'}),
+                        html.H5("数量差异 SỐ LƯỢNG CHÊNH LỆCH", style={'textAlign':'center'}),
                     ])
                 ]),
 
@@ -158,7 +158,7 @@ def layout():
                     dbc.Col([
                         dcc.Graph(id='wh_product_graph_decrease')
                     ], width=6)
-                ], style={'padding-top':'20px'}),
+                ], style={'paddingTop':'20px'}),
 
                 dbc.Row([
                     dbc.Col([
