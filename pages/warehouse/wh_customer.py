@@ -114,6 +114,8 @@ def layout():
                 html.H2(id='wh_customer_title_sales_increase'),
                 dash_table.DataTable(
                     id='wh_customer_table_sales_increase',
+                    export_format='xlsx',
+                    export_headers='display',
                     #sort_action="native",
                     style_cell_conditional=[
                         {
@@ -157,6 +159,8 @@ def layout():
                 html.H2(id='wh_customer_title_sales_decrease'),
                 dash_table.DataTable(
                     id='wh_customer_table_sales_decrease',
+                    export_format='xlsx',
+                    export_headers='display',
                     #sort_action="native",
                     style_cell_conditional=[
                         {
@@ -203,6 +207,8 @@ def layout():
                 html.H2(id='wh_customer_title_order_increase'),
                 dash_table.DataTable(
                     id='wh_customer_table_order_increase',
+                    export_format='xlsx',
+                    export_headers='display',
                     #sort_action="native",
                     style_cell_conditional=[
                         {
@@ -246,6 +252,8 @@ def layout():
                 html.H2(id='wh_customer_title_order_decrease'),
                 dash_table.DataTable(
                     id='wh_customer_table_order_decrease',
+                    export_format='xlsx',
+                    export_headers='display',
                     #sort_action="native",
                     style_cell_conditional=[
                         {
