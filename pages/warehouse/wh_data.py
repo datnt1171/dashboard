@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 import pandas as pd
 from utils import constants
 from utils.query.wh.extract import get_all_row_order, get_all_row_sales
+from utils.etl.insert_data import process_sales_file, process_order_file
+import re
 
 dash.register_page(__name__, path="/wh_data")
 
@@ -15,26 +17,29 @@ today = datetime.today().date()
 yesterday = today - timedelta(days=1)
 first_date = today.replace(day=1)
 
-def process_upload_data(contents, filename, last_modified, folder_path):
-    # Decode the file content
+def process_upload_data(contents, filename, last_modified, folder_path, post_process_func=None):
     content_type, content_string = contents.split(",")
     decoded = base64.b64decode(content_string)
 
-    if '.xls' in filename:
-        # Save the file to the upload folder
-        file_path = os.path.join(folder_path, filename)
-        with open(file_path, "wb") as f:
+    if filename.lower().endswith(('.xls', '.xlsx')):
+        os.makedirs(folder_path, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        sanitized_filename = re.sub(r'[^a-zA-Z0-9_.-]', '_', filename)
+        full_path = os.path.join(folder_path, f"{timestamp}_{sanitized_filename}")
+
+        with open(full_path, "wb") as f:
             f.write(decoded)
 
-        return dbc.Alert(
-                f"File '{filename}' tải lên thành công!",
-                color="success",
-            )
+        # Call post-processing function
+        if post_process_func:
+            try:
+                post_process_func(full_path)
+            except Exception as e:
+                return dbc.Alert(f"Lỗi xử lý dữ liệu: {e}", color="danger")
+
+        return dbc.Alert(f"File '{filename}' tải lên và xử lý thành công!", color="success")
     else:
-        return dbc.Alert(
-            f"Lỗi khi đọc '{filename}'. Dữ liệu không hợp lệ.",
-            color="danger",
-        )
+        return dbc.Alert(f"Lỗi khi đọc '{filename}'. Dữ liệu không hợp lệ.", color="danger")
 
 layout = dbc.Container([
     dbc.Row([
@@ -123,8 +128,9 @@ layout = dbc.Container([
 )
 def save_uploaded_order(contents, filename, last_modified):
     if contents is not None:
-        return process_upload_data(contents, filename, last_modified, constants.wh_data_folder_order)
-
+        return process_upload_data(contents, filename, last_modified,
+                                   constants.wh_data_folder_order,
+                                   post_process_func=process_order_file)
     return dbc.Alert("Chưa có file được tải lên", color="info")
 
 #Upload sales data
@@ -134,10 +140,11 @@ def save_uploaded_order(contents, filename, last_modified):
     State("wh_data_upload_sales", "filename"),
     State("wh_data_upload_sales", "last_modified"),
 )
-def save_uploaded_order(contents, filename, last_modified):
+def save_uploaded_sales(contents, filename, last_modified):
     if contents is not None:
-        return process_upload_data(contents, filename, last_modified, constants.wh_data_folder_sales)
-
+        return process_upload_data(contents, filename, last_modified,
+                                   constants.wh_data_folder_sales,
+                                   post_process_func=process_sales_file)
     return dbc.Alert("Chưa có file được tải lên", color="info")
 
 
