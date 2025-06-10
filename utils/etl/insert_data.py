@@ -36,7 +36,47 @@ def process_sales_file(file_path: str):
     df['import_timestamp'] = datetime.now()
 
     # Add missing columns
-    copr23_columns = [ ... ]  # You can paste the same list of expected columns from your script here
+    copr23_columns = ['product_code',
+                            'product_name',
+                            'qc',
+                            'factory_code' ,
+                            'factory_name' ,
+                            'sales_date' ,
+                            'sales_code' ,
+                            'order_code' ,
+                            'sales_quantity' ,
+                            'gift_quantity' ,
+                            'unit' ,
+                            'small_unit' ,
+                            'package_sales_quantity' ,
+                            'package_gift_quantity' ,
+                            'package_unit' ,
+                            'priced_quantity' ,
+                            'priced_unit',
+                            'currency' ,
+                            'exchange_rate',
+                            'price' ,
+                            'unpaid_tw' ,
+                            'tax_tw' ,
+                            'unpaid_vn' ,
+                            'tax_vn',
+                            'capital' ,
+                            'gross_profit' ,
+                            'gross_profit_rate',
+                            'lot_code' ,
+                            'tax_type' ,
+                            'department' ,
+                            'salesman' ,
+                            'export_factory_code' ,
+                            'export_factory' ,
+                            'warehouse_code' ,
+                            'warehouse_type' ,
+                            'warehouse_loc' ,
+                            'import_code' ,
+                            'note' ,
+                            'factory_order_code',
+
+                            'import_timestamp']
     for col in copr23_columns:
         if col not in df.columns:
             df[col] = None
@@ -51,7 +91,24 @@ def process_sales_file(file_path: str):
         port=os.getenv('STAGING_PORT')
     )
     staging_cur = staging_conn.cursor()
-    insert_query = """ INSERT INTO copr23 (...) VALUES (%s, ..., %s) ON CONFLICT (sales_code) DO NOTHING; """
+    insert_query = """
+                    INSERT INTO copr23 (
+                    product_code, product_name,qc,factory_code ,factory_name ,sales_date ,sales_code ,
+                    order_code ,sales_quantity ,gift_quantity ,unit ,small_unit,package_sales_quantity ,
+                    package_gift_quantity ,package_unit ,priced_quantity ,priced_unit,currency ,exchange_rate,
+                    price ,unpaid_tw ,tax_tw ,unpaid_vn ,tax_vn,capital ,gross_profit ,gross_profit_rate,
+                    lot_code ,tax_type ,department ,salesman ,export_factory_code ,export_factory ,warehouse_code ,
+                    warehouse_type ,warehouse_loc ,import_code ,note ,factory_order_code,
+
+                    import_timestamp
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    )
+                    ON CONFLICT (sales_code) DO NOTHING;
+                """
     for _, row in df.iterrows():
         try:
             staging_cur.execute(insert_query, tuple(row))
@@ -75,7 +132,16 @@ def process_sales_file(file_path: str):
     latest_import = wh_cur.fetchone()[0]
 
     # Reconnect to staging to pull new rows
-    staging_cur.execute("""SELECT product_code, ... FROM copr23 WHERE import_timestamp > %s""", (latest_import,))
+    staging_cur.execute("""SELECT product_code,product_name,qc,factory_code,
+                            sales_date,sales_code,order_code,sales_quantity,
+                            unit,package_sales_quantity,
+                            package_unit,
+                            department,salesman,
+                            warehouse_code,warehouse_type, import_code, factory_order_code,
+                            import_timestamp
+                            FROM copr23
+                            WHERE import_timestamp > %(latest_import)s
+                                    """,{'latest_import':latest_import})
     df_new = pd.DataFrame(staging_cur.fetchall(), columns=[desc[0] for desc in staging_cur.description])
 
     df_new['sales_date'] = pd.to_datetime(df_new['sales_date'], dayfirst=True)
@@ -99,26 +165,6 @@ def process_sales_file(file_path: str):
 
     # Final load to warehouse
     insert_data(df_new, "fact_sales", wh_conn)
-
-    # --- UPDATE DIM FACTORY ---
-    staging_cur.execute("SELECT DISTINCT factory_code, factory_name FROM copr13 ORDER BY factory_code")
-    df_factory = pd.DataFrame(staging_cur.fetchall(), columns=[desc[0] for desc in staging_cur.description])
-    df_factory.drop_duplicates(subset='factory_code', inplace=True)
-    df_factory['factory_code'] = df_factory['factory_code'].str.replace(r'.0', '', regex=False)
-
-    for _, row in df_factory.iterrows():
-        wh_cur.execute("""
-            INSERT INTO dim_factory (factory_code, factory_name)
-            VALUES (%s, %s)
-            ON CONFLICT (factory_code)
-            DO UPDATE SET factory_name = EXCLUDED.factory_name
-        """, (row['factory_code'], row['factory_name']))
-    wh_conn.commit()
-
-    print("✅ File processed and loaded to data warehouse.")
-
-# Usage:
-# process_sales_file(r"D:\VL1251\dashboard\data\wh\sales\your_file.xlsx")
 
 
 
@@ -156,7 +202,29 @@ def process_order_file(file_path: str):
     df_copr13['import_timestamp'] = datetime.now()
 
     # Add missing columns
-    copr13_columns = [...]  # keep your long copr13 column list here
+    copr13_columns = ['order_date','order_code','ct_date','factory_code','factory_name',
+                                'factory_order_code','currency','exchange_rate','tax_type',
+                                'channel','type','area','nation','path','path_2','department',
+                                'salesman','export_factory','register_price','note','deposit',
+                                'deposit_rate','payment_registration_code',
+                                'payment_registration_name','register_transaction','delivery_address',
+                                'delivery_address_2','volumn_unit','money_order','tax',
+                                'total_quantity','gw','total_volumn','total_package',
+                                'numerical_order','product_code','product_name','qc',
+                                'factory_product_code','warehouse_type','predict_code',
+                                'factory_product_name','factory_qc','order_quantity',
+                                'delivered_quantity','package_order_quantity',
+                                'delivered_package_order_quantity','gift_quantity',
+                                'delivered_gift_quantity','package_gift_quantity',
+                                'delivered_package_gift_quantity','reserve_quantity',
+                                'delivered_reserve_quantity','package_reserve_quantity',
+                                'delivered_package_reserve_quantity','temporary_export_quantity',
+                                'package_temporary_export_quantity','unit','small_unit',
+                                'package_unit','price','money','priced_quantity',
+                                'estimated_delivery_date','original_estimated_delivery_date',
+                                'priced_unit','pre_ct','note_1','finish_code','package_pt',
+                                'package_name','weight_with_package','volumn_with_package',
+                                'project_code','project_name','import_timestamp']
     for col in copr13_columns:
         if col not in df_copr13.columns:
             df_copr13[col] = None
@@ -171,12 +239,45 @@ def process_order_file(file_path: str):
     )
     staging_cur = staging_conn.cursor()
 
-    insert_query = """ 
-        INSERT INTO copr13 (...) VALUES (...) 
-        ON CONFLICT (order_code) DO UPDATE SET
-        order_quantity = EXCLUDED.order_quantity,
-        import_timestamp = EXCLUDED.import_timestamp;
-    """  # Replace `...` with your actual query
+    insert_query = """
+                    INSERT INTO copr13 (
+                    order_date, order_code, ct_date, factory_code, factory_name,
+                    factory_order_code, currency, exchange_rate, tax_type,
+                    channel, type, area, nation, path, path_2, department,
+                    salesman, export_factory, register_price, note, deposit,
+                    deposit_rate, payment_registration_code,
+                    payment_registration_name, register_transaction, delivery_address,
+                    delivery_address_2, volumn_unit, money_order, tax,
+                    total_quantity, gw, total_volumn, total_package,
+                    numerical_order, product_code, product_name, qc,
+                    factory_product_code, warehouse_type, predict_code,
+                    factory_product_name, factory_qc, order_quantity,
+                    delivered_quantity, package_order_quantity,
+                    delivered_package_order_quantity, gift_quantity,
+                    delivered_gift_quantity, package_gift_quantity,
+                    delivered_package_gift_quantity, reserve_quantity,
+                    delivered_reserve_quantity, package_reserve_quantity,
+                    delivered_package_reserve_quantity, temporary_export_quantity,
+                    package_temporary_export_quantity, unit, small_unit,
+                    package_unit, price, money, priced_quantity,
+                    estimated_delivery_date, original_estimated_delivery_date,
+                    priced_unit, pre_ct, note_1, finish_code, package_pt,
+                    package_name, weight_with_package, volumn_with_package,
+                    project_code, project_name, import_timestamp
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s
+                    )
+                    ON CONFLICT (order_code) DO UPDATE SET
+                        order_quantity = EXCLUDED.order_quantity,
+                        import_timestamp = EXCLUDED.import_timestamp;
+                """
 
     successful_inserts = []
     conflict_rows = []
@@ -221,8 +322,14 @@ def process_order_file(file_path: str):
         port=os.getenv('STAGING_PORT')
     )
     staging_cur = staging_conn.cursor()
-    staging_cur.execute("""SELECT ... FROM copr13 WHERE import_timestamp > %(latest_import)s""",
-                        {'latest_import': latest_import})  # Fill in SELECT columns
+    staging_cur.execute("""SELECT order_date, order_code, ct_date, factory_code, factory_order_code,
+                            tax_type, department, salesman, deposit_rate, payment_registration_code, payment_registration_name,
+                            delivery_address, product_code, product_name, qc, warehouse_type, order_quantity, delivered_quantity,
+                            package_order_quantity, delivered_package_order_quantity, unit, package_unit, estimated_delivery_date,
+                            original_estimated_delivery_date, pre_ct, finish_code, import_timestamp
+                            FROM copr13
+                            WHERE import_timestamp > %(latest_import)s
+                                """,{'latest_import':latest_import})
     data = staging_cur.fetchall()
     columns = [desc[0] for desc in staging_cur.description]
     df_copr13 = pd.DataFrame(data, columns=columns)
