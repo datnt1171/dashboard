@@ -115,33 +115,35 @@ layout = dbc.Container([
                          filter_action="native",
                          sort_action="native",
                          style_table={'height': '300px', 'overflowY': 'auto'}),
-    
-
 ])
 
-#Upload order data
 @callback(
     Output("wh_data_upload_order_status", "children"),
-    Input("wh_data_upload_order", "contents"),
-    State("wh_data_upload_order", "filename"),
-    State("wh_data_upload_order", "last_modified"),
+    [Input("wh_data_upload_order", "contents"),
+     Input("wh_data_upload_order", "filename"),
+     Input("wh_data_upload_order", "last_modified")],
+    prevent_initial_call=False,  # Changed to False
 )
 def save_uploaded_order(contents, filename, last_modified):
-    if contents is not None:
+    print(f"Order callback triggered: contents={bool(contents)}, filename={filename}")  # Debug print
+    
+    if contents is not None and filename is not None:
         return process_upload_data(contents, filename, last_modified,
                                    constants.wh_data_folder_order,
                                    post_process_func=process_order_file)
     return dbc.Alert("Chưa có file được tải lên", color="info")
 
-#Upload sales data
 @callback(
     Output("wh_data_upload_sales_status", "children"),
-    Input("wh_data_upload_sales", "contents"),
-    State("wh_data_upload_sales", "filename"),
-    State("wh_data_upload_sales", "last_modified"),
+    [Input("wh_data_upload_sales", "contents"),
+     Input("wh_data_upload_sales", "filename"),
+     Input("wh_data_upload_sales", "last_modified")],
+    prevent_initial_call=False,  # Changed to False
 )
 def save_uploaded_sales(contents, filename, last_modified):
-    if contents is not None:
+    print(f"Sales callback triggered: contents={bool(contents)}, filename={filename}")  # Debug print
+    
+    if contents is not None and filename is not None:
         return process_upload_data(contents, filename, last_modified,
                                    constants.wh_data_folder_sales,
                                    post_process_func=process_sales_file)
@@ -159,7 +161,6 @@ def save_uploaded_sales(contents, filename, last_modified):
      Input('wh_data_date_range','end_date')],
      prevent_initial_call=True,
 )
-
 def load_data(start_date, end_date):
     df_order = get_all_row_order(start_date, end_date)
     df_order.columns = ['Ngày ĐĐH','Mã ĐĐH','Ngày CT','Mã KH','Mã ĐĐH của KH',

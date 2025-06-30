@@ -1,23 +1,30 @@
-def insert_data(df_data, table_name, conn):
+def insert_data(df_data, table_name, conn, pk_column):
     """
     Inserts data from a DataFrame into a specified PostgreSQL table.
+    On primary key conflict, updates the existing row.
 
     Parameters:
     df_data (pd.DataFrame): DataFrame containing the data to insert.
     conn (psycopg2 connection): Active connection to the PostgreSQL database.
     table_name (str): The name of the table to insert data into.
+    pk_column (str): The primary key column name for conflict resolution.
     """
     try:
         # Get the column names from the DataFrame
         columns = list(df_data.columns)
 
-        # Create the SQL insert query dynamically based on column names
+        # Build the SET part for DO UPDATE (exclude PK from update targets)
+        set_columns = [f"{col} = EXCLUDED.{col}" for col in columns if col != pk_column]
+
+        # Create the SQL insert query with ON CONFLICT DO UPDATE
         insert_query = f"""
             INSERT INTO {table_name} ({', '.join(columns)})
-            VALUES ({', '.join(['%s'] * len(columns))});
+            VALUES ({', '.join(['%s'] * len(columns))})
+            ON CONFLICT ({pk_column})
+            DO UPDATE SET {', '.join(set_columns)};
         """
 
-        # Convert the DataFrame to a list of tuples (for batch insert)
+        # Convert the DataFrame to a list of tuples
         data = [tuple(row[1:]) for row in df_data.itertuples()]
 
         # Execute the batch insert
@@ -25,10 +32,11 @@ def insert_data(df_data, table_name, conn):
         cur.executemany(insert_query, data)
         conn.commit()
 
-        print("Data inserted successfully!")
+        print("Data inserted or updated successfully!")
     except Exception as e:
-        conn.rollback()  # Rollback in case of any error
+        conn.rollback()
         print(f"An error occurred: {e}")
+
         
 def update_product_list():
     import pandas as pd

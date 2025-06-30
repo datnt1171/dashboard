@@ -6,7 +6,7 @@ import numpy as np
 import psycopg2
 from psycopg2 import OperationalError
 from dotenv import load_dotenv
-from .utils import insert_data, update_product_list, update_factory_list
+from utils.etl.utils import insert_data, update_product_list, update_factory_list
 load_dotenv()
 
 def process_sales_file(file_path: str):
@@ -164,7 +164,7 @@ def process_sales_file(file_path: str):
     df_new['import_wh_timestamp'] = datetime.now()
 
     # Final load to warehouse
-    insert_data(df_new, "fact_sales", wh_conn)
+    insert_data(df_new, "fact_sales", wh_conn, 'sales_code')
 
 
 
@@ -370,7 +370,7 @@ def process_order_file(file_path: str):
         host=os.getenv('WAREHOUSE_HOST'),
         port=os.getenv('WAREHOUSE_PORT')
     )
-    insert_data(df_copr13, "fact_order", warehouse_conn)
+    insert_data(df_copr13, "fact_order", warehouse_conn, "order_code")
     warehouse_conn.close()
 
     update_product_list()
