@@ -67,7 +67,7 @@ def layout():
             dbc.Col([
                 # Ratio table
                 dbc.Row([
-                    html.H4("Tỉ lệ sơn/dung môi (比率)", style={'marginTop': '20px'}),
+                    html.H4("Tỉ lệ dung môi/sơn (比率)", style={'marginTop': '20px'}),
                     dash_table.DataTable(
                         id='wh_ratio_table_ratio',
                         export_format='xlsx',
@@ -153,7 +153,7 @@ def update_ratio_tables(selected_year, selected_paint, selected_thinner):
     paint_df = df_paint.pivot(index=['factory_code','factory_name'],
                               columns='month',
                               values='sales_quantity')
-    ratio_df = paint_df.div(thinner_df.replace(0, np.nan)).fillna(0)
+    ratio_df = thinner_df.div(paint_df.replace(0, np.nan)).fillna(0)
     
     # Reset index to be a df
     thinner_df.columns.name = None
@@ -164,6 +164,18 @@ def update_ratio_tables(selected_year, selected_paint, selected_thinner):
     
     ratio_df.columns.name = None
     ratio_df.reset_index(inplace=True)
+
+    factory_order = (
+        df.groupby(['factory_code', 'factory_name'], as_index=False)['sales_quantity']
+        .sum()
+        .sort_values('sales_quantity', ascending=False)
+        [['factory_code', 'factory_name']]
+    )
+    
+    paint_df = paint_df.reset_index().merge(factory_order, on=['factory_code','factory_name'], how='right')
+    thinner_df = thinner_df.reset_index().merge(factory_order, on=['factory_code','factory_name'], how='right')
+    ratio_df = ratio_df.reset_index().merge(factory_order, on=['factory_code','factory_name'], how='right')
+
 
     # Create standardized columns for all tables
     columns = [
@@ -181,14 +193,14 @@ def update_ratio_tables(selected_year, selected_paint, selected_thinner):
             'name': f'{month}月',
             'id': str(month),
             'type': 'numeric',
-            'format': {'specifier': ',.2f'}
+            'format': {'specifier': ',.0f'}
         })
         
         ratio_columns.append({
             'name': f'{month}月',
             'id': str(month),
             'type': 'numeric',
-            'format': {'specifier': ',.4f'}
+            'format': {'specifier': ',.2f'}
         })
     
     # Convert to dict for DataTable
