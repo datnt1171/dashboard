@@ -16,12 +16,14 @@ database_port = os.getenv('WAREHOUSE_PORT')
 
 def get_users():
     dict_role = {'admin': ['wh_overall', 'wh_customer' ,'wh_product','wh_plan','wh_compare','wh_conclusion','wh_data',
+                           'wh_ratio','wh_aging',
                        'cm_daily','cm_weekly','cm_qc',
                        's_daily','s_weekly','s_systemsheet',
                        'prod_daily','prod_weekly',
                        'rd_daily','rd_weekly'],
                        
-             'warehouse': ['wh_overall', 'wh_customer' ,'wh_product','wh_plan','wh_compare','wh_conclusion','wh_data'],
+             'warehouse': ['wh_overall', 'wh_customer' ,'wh_product','wh_plan','wh_compare','wh_conclusion','wh_data',
+                           'wh_ratio','wh_ratio'],
              'color_mixing': ['cm_daily','cm_weekly','cm_qc'],
              'sales': ['s_daily','s_weekly','s_systemsheet'],
              'production': ['prod_daily','prod_weekly'],

@@ -147,6 +147,8 @@ def render_navbar(n_intervals):
                             dbc.DropdownMenuItem("預期交付和實際交付 - Dự định/Thực tế GH", href="/wh_plan", disabled=disable_page('wh_plan',permissions)),
                             dbc.DropdownMenuItem("比較 - So sánh", href="/wh_compare", disabled=disable_page('wh_compare',permissions)),
                             dbc.DropdownMenuItem("結論 - Kết luận", href="/wh_conclusion", disabled=disable_page('wh_conclusion',permissions)),
+                            dbc.DropdownMenuItem("比率 - Tỉ lệ", href="/wh_ratio", disabled=disable_page('wh_ratio',permissions)),
+                            dbc.DropdownMenuItem("老化 - Tồn kho", href="/wh_aging", disabled=disable_page('wh_aging',permissions)),
                             dbc.DropdownMenuItem("Dữ liệu", href="/wh_data", disabled=disable_page('wh_data',permissions))
                         ],
                         nav=True,

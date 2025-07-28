@@ -576,3 +576,28 @@ def get_compare_sales_data(factory_name, product_name, list_year, time_groupby):
             return df
     finally:
         Database.return_connection(conn)
+        
+
+def get_sales_ratio(selected_year):
+    try:
+        conn = Database.get_connection()
+        with conn.cursor() as cur:
+            cur.execute("""SELECT sum (sales_quantity) as sales_quantity, 
+                        df.factory_code, df.factory_name, dd.year, dd.month, dp.product_type
+                        FROM fact_sales fs
+                            JOIN dim_date dd
+                            ON fs.sales_date = dd.date
+                            JOIN dim_factory df
+                            ON fs.factory_code = df.factory_code
+                            JOIN dim_product dp
+                            ON fs.product_code = dp.product_code
+                        WHERE dd.year = %(selected_year)s
+                        GROUP BY df.factory_code, dd.year, dd.month, dp.product_type""",
+                        {'selected_year': selected_year})
+
+            data = cur.fetchall()
+            column_names = [description[0] for description in cur.description]
+            df = pd.DataFrame(data = data, columns = column_names)
+            return df
+    finally:
+        Database.return_connection(conn)
