@@ -35,6 +35,20 @@ def layout():
                             id='wh_ratio_selected_year',
                             clearable=False)
                     ], style= {'paddingBottom': '10px'}),
+                
+                dbc.Row([
+                    html.H5("顯示表格 - Hiển thị bảng"),
+                    dcc.Checklist(
+                        id='wh_ratio_table_toggle',
+                        options=[
+                            {'label': '比率 (Tỉ lệ)', 'value': 'show_ratio'},
+                            {'label': '油漆組 (Sơn)', 'value': 'show_paint'},
+                            {'label': '溶劑 (Dung môi)', 'value': 'show_thinner'},
+                        ],
+                        value=['show_ratio'],
+                        inline=False
+                    )
+                ], style= {'paddingBottom': '10px'}),
                                  
                 dbc.Row([
                     html.H6("選擇油漆組 - Chọn nhóm sơn"),
@@ -66,46 +80,49 @@ def layout():
             # Main content with three tables
             dbc.Col([
                 # Ratio table
-                dbc.Row([
-                    html.H4("Tỉ lệ dung môi/sơn (比率)", style={'marginTop': '20px'}),
-                    dash_table.DataTable(
-                        id='wh_ratio_table_ratio',
-                        export_format='xlsx',
-                        export_headers='display',
-                        style_table={'overflowX': 'auto'},
-                        style_cell={'textAlign': 'left', 'padding': '5px'},
-                        style_header={'backgroundColor': 'lightyellow', 'fontWeight': 'bold'}
-                    )
+                html.Div(id='wh_ratio_table_ratio_container', children=[
+                    dbc.Row([
+                        html.H4("Tỉ lệ dung môi/sơn (比率)", style={'marginTop': '20px'}),
+                        dash_table.DataTable(
+                            id='wh_ratio_table_ratio',
+                            export_format='xlsx',
+                            export_headers='display',
+                            style_table={'overflowX': 'auto'},
+                            style_cell={'textAlign': 'left', 'padding': '5px'},
+                            style_header={'backgroundColor': 'lightyellow', 'fontWeight': 'bold'}
+                        )
+                    ])
                 ]),
-                
+
                 # Paint table
-                dbc.Row([
-                    html.H4("Giao hàng sơn (油漆組)", style={'marginTop': '20px'}),
-                    dash_table.DataTable(
-                        id='wh_ratio_table_paint',
-                        export_format='xlsx',
-                        export_headers='display',
-                        style_table={'overflowX': 'auto'},
-                        style_cell={'textAlign': 'left', 'padding': '5px'},
-                        style_header={'backgroundColor': 'lightblue', 'fontWeight': 'bold'}
-                    )
-                ], style={'marginBottom': '30px'}),
-                
-                # Thinner table  
-                dbc.Row([
-                    html.H4("Giao hàng dung môi (溶劑)", style={'marginTop': '20px'}),
-                    dash_table.DataTable(
-                        id='wh_ratio_table_thinner',
-                        export_format='xlsx',
-                        export_headers='display',
-                        style_table={'overflowX': 'auto'},
-                        style_cell={'textAlign': 'left', 'padding': '5px'},
-                        style_header={'backgroundColor': 'lightgreen', 'fontWeight': 'bold'}
-                    )
-                ], style={'marginBottom': '30px'}),
-                
-                
-                             
+                html.Div(id='wh_ratio_table_paint_container', children=[
+                    dbc.Row([
+                        html.H4("Giao hàng sơn (油漆組)", style={'marginTop': '20px'}),
+                        dash_table.DataTable(
+                            id='wh_ratio_table_paint',
+                            export_format='xlsx',
+                            export_headers='display',
+                            style_table={'overflowX': 'auto'},
+                            style_cell={'textAlign': 'left', 'padding': '5px'},
+                            style_header={'backgroundColor': 'lightblue', 'fontWeight': 'bold'}
+                        )
+                    ], style={'marginBottom': '30px'})
+                ]),
+
+                # Thinner table
+                html.Div(id='wh_ratio_table_thinner_container', children=[
+                    dbc.Row([
+                        html.H4("Giao hàng dung môi (溶劑)", style={'marginTop': '20px'}),
+                        dash_table.DataTable(
+                            id='wh_ratio_table_thinner',
+                            export_format='xlsx',
+                            export_headers='display',
+                            style_table={'overflowX': 'auto'},
+                            style_cell={'textAlign': 'left', 'padding': '5px'},
+                            style_header={'backgroundColor': 'lightgreen', 'fontWeight': 'bold'}
+                        )
+                    ], style={'marginBottom': '30px'})
+                ]),               
             ], width=10),
           ]),
      ], fluid=True)
@@ -213,5 +230,17 @@ def update_ratio_tables(selected_year, selected_paint, selected_thinner):
             ratio_data, ratio_columns)
     
 
+@callback(
+    Output('wh_ratio_table_ratio_container', 'style'),
+    Output('wh_ratio_table_paint_container', 'style'),
+    Output('wh_ratio_table_thinner_container', 'style'),
+    Input('wh_ratio_table_toggle', 'value')
+)
+def toggle_table_visibility(visible_tables):
+    return (
+        {'display': 'block'} if 'show_ratio' in visible_tables else {'display': 'none'},
+        {'display': 'block'} if 'show_paint' in visible_tables else {'display': 'none'},
+        {'display': 'block'} if 'show_thinner' in visible_tables else {'display': 'none'}
+    )
 
         
