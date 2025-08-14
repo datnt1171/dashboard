@@ -507,6 +507,7 @@ def get_all_row_order(start_date, end_date):
             data = cur.fetchall()
             column_names = [description[0] for description in cur.description]
             df = pd.DataFrame(data = data, columns = column_names)
+            df = df.drop(columns=["is_active", "has_onsite"], errors="ignore")
             return df
     finally:
         Database.return_connection(conn)
@@ -525,6 +526,7 @@ def get_all_row_sales(start_date, end_date):
             data = cur.fetchall()
             column_names = [description[0] for description in cur.description]
             df = pd.DataFrame(data = data, columns = column_names)
+            df = df.drop(columns=["is_active", "has_onsite"], errors="ignore")
             return df
     finally:
         Database.return_connection(conn)
