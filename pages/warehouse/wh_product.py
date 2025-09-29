@@ -293,62 +293,30 @@ def update_chart(start_date, end_date, start_date_target, end_date_target, activ
     df_sales_all = df_sales_all.tail(10)
 
     # Plot
-    fig_increase = px.bar(df_increase, x='product_name', y='quantity_diff', text_auto=False)
-    fig_increase.update_traces(marker_color='#339966', textposition='inside')
-
-    # Calculate totals and add annotations on top
-    totals = df_increase.groupby('product_name')['quantity_diff'].sum()
-    annotations = []
-    for product, total in totals.items():
-        annotations.append(dict(
-            x=product,
-            y=total,
-            text=f'{total:,.0f}',
-            showarrow=False,
-            yshift=10,  # Position above the bar
-            font=dict(size=12, color='black')
-        ))
-
-    max_y = df_increase['quantity_diff'].max() * 1.5
-    fig_increase.update_layout(
-        yaxis_range=[0, max_y],
-        xaxis_title="產品名稱 - Tên SP",
-        yaxis_title="數量 - Số lượng",
-        yaxis=dict(tickformat=',.0f'),
-        title='產品增加 - Sản phẩm tăng', 
-        title_font=dict(size=24, color='black'),
-        title_x=0.5,
-        annotations=annotations
-    )
+    fig_increase = px.bar(df_increase, x='product_name', y='quantity_diff', text_auto=True)
+    fig_increase.update_traces(marker_color='#339966', textposition='outside')
+    max_y = df_increase['quantity_diff'].max() * 1.2  # Increase by 20%
+    fig_increase.update_layout(yaxis_range=[0, max_y],
+                                xaxis_title="產品名稱 - Tên SP",
+                                yaxis_title="數量 - Số lượng",
+                                yaxis=dict(tickformat=',.0f'),
+                                title='產品增加 - Sản phẩm tăng', 
+                                title_font=dict(size=24, color='black'),
+                                title_x=0.5  # Center the title (0 is left, 0.5 is center, 1 is right)
+                               )
 
     # Fig decrease
-    fig_decrease = px.bar(df_decrease.sort_values(by='quantity_diff'), x='product_name', y='quantity_diff', text_auto=False)
-    fig_decrease.update_traces(marker_color='#FF3333', textposition='inside')
-
-    # Calculate totals and add annotations on top
-    totals_dec = df_decrease.groupby('product_name')['quantity_diff'].sum()
-    annotations_dec = []
-    for product, total in totals_dec.items():
-        annotations_dec.append(dict(
-            x=product,
-            y=total,
-            text=f'{total:,.0f}',
-            showarrow=False,
-            yshift=10,
-            font=dict(size=12, color='black')
-        ))
-
-    min_y = df_decrease['quantity_diff'].min() * 1.5
-    fig_decrease.update_layout(
-        yaxis_range=[0, min_y],
-        xaxis_title="產品名稱 - Tên SP",
-        yaxis_title="數量 - Số lượng",
-        yaxis=dict(tickformat=',.0f'),
-        title='產品減少 - Sản phẩm giảm', 
-        title_font=dict(size=24, color='black'), 
-        title_x=0.5,
-        annotations=annotations_dec
-    )
+    fig_decrease = px.bar(df_decrease.sort_values(by='quantity_diff'), x='product_name', y='quantity_diff', text_auto=True)
+    fig_decrease.update_traces(marker_color='#FF3333', textposition='outside')
+    min_y = df_decrease['quantity_diff'].min() * 1.2  # Increase by 10%
+    fig_decrease.update_layout(yaxis_range=[0, min_y],
+                                xaxis_title="產品名稱 - Tên SP",
+                                yaxis_title="數量 - Số lượng",
+                                yaxis=dict(tickformat=',.0f'),
+                                title='產品減少 - Sản phẩm giảm', 
+                                title_font=dict(size=24, color='black'), 
+                                title_x=0.5  # Center the title (0 is left, 0.5 is center, 1 is right)
+                                )
 
 
     fig_sales_all = px.bar(df_sales_all, y='product_name', x='sales_quantity', text_auto=True, orientation='h')
@@ -363,9 +331,8 @@ def update_chart(start_date, end_date, start_date_target, end_date_target, activ
                                 title_x=0.5  # Center the title (0 is left, 0.5 is center, 1 is right)
                                 )
 
-    df = df[['product_code','product_name','total_quantity','total_quantity_prev','quantity_diff']]
+    df = df[['product_name','total_quantity','total_quantity_prev','quantity_diff']]
     new_column_names = {
-        'product_code': f'產品代碼 - Mã SP',
         'product_name': f'產品名稱 - Tên SP',
         'total_quantity': f'{start_date.date()} 天到 {end_date.date()} 天的銷售額 - Bán hàng từ {start_date.date()} đến {end_date.date()}',
         'total_quantity_prev': f'{start_date_target.date()} 天到 {end_date_target.date()} 天的銷售額 - Bán hàng từ {start_date_target.date()} đến {end_date_target.date()}',

@@ -277,7 +277,7 @@ def get_mtd_product(start_date, end_date, start_date_target, end_date_target, fa
         conn = Database.get_connection()
         with conn.cursor() as cur:
             cur.execute("""WITH product_list AS (
-                                SELECT DISTINCT product_code, product_name
+                                SELECT DISTINCT product_name
                                 FROM fact_sales JOIN dim_factory
                                 ON fact_sales.factory_code = dim_factory.factory_code
                                 WHERE factory_name = %(factory_name)s
@@ -288,27 +288,27 @@ def get_mtd_product(start_date, end_date, start_date_target, end_date_target, fa
                                 )
                             ),
                             current_month AS (
-                                SELECT product_code, product_name, SUM(sales_quantity) AS total_quantity
+                                SELECT product_name, SUM(sales_quantity) AS total_quantity
                                 FROM fact_sales JOIN dim_factory
                                 ON fact_sales.factory_code = dim_factory.factory_code
                                 WHERE factory_name = %(factory_name)s
                                 AND sales_date BETWEEN %(start_date)s AND %(end_date)s
-                                GROUP BY product_code, product_name
+                                GROUP BY product_name
                             ),
                             previous_month AS (
-                                SELECT product_code, product_name, SUM(sales_quantity) AS total_quantity_prev
+                                SELECT product_name, SUM(sales_quantity) AS total_quantity_prev
                                 FROM fact_sales JOIN dim_factory
                                 ON fact_sales.factory_code = dim_factory.factory_code
                                 WHERE factory_name = %(factory_name)s
                                 AND sales_date BETWEEN %(start_date_target)s AND %(end_date_target)s
-                                GROUP BY product_code, product_name
+                                GROUP BY product_name
                             )
-                            SELECT pl.product_code, pl.product_name,
+                            SELECT pl.product_name,
                                 COALESCE(cm.total_quantity, 0) AS total_quantity, 
                                 COALESCE(pm.total_quantity_prev, 0) AS total_quantity_prev
                             FROM product_list pl
-                            LEFT JOIN current_month cm ON pl.product_code = cm.product_code
-                            LEFT JOIN previous_month pm ON pl.product_code = pm.product_code
+                            LEFT JOIN current_month cm ON pl.product_name = cm.product_name
+                            LEFT JOIN previous_month pm ON pl.product_name = pm.product_name
                         """,
                         {'start_date': start_date, 'end_date': end_date,
                         'start_date_target': start_date_target, 'end_date_target': end_date_target,
