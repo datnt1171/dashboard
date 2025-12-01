@@ -140,7 +140,7 @@ def get_mtd_factory_sales(start_date, end_date, start_date_target, end_date_targ
                                 WHERE sales_date BETWEEN %(start_date_target)s AND %(end_date_target)s
                                 GROUP BY factory_code
                             )
-                            SELECT fl.factory_code, factory_name, salesman,
+                            SELECT fl.factory_code, factory_name, fl.salesman,
                                 COALESCE(cm.total_quantity, 0) AS total_quantity, 
                                 COALESCE(pm.total_quantity_prev, 0) AS total_quantity_prev
                             FROM factory_list fl
@@ -214,7 +214,7 @@ def get_mtd_factory_order(start_date, end_date, start_date_target, end_date_targ
                                 WHERE order_date BETWEEN %(start_date_target)s AND %(end_date_target)s
                                 GROUP BY factory_code
                             )
-                            SELECT fl.factory_code, factory_name, salesman,
+                            SELECT fl.factory_code, factory_name, fl.salesman,
                                 COALESCE(cm.total_quantity, 0) AS total_quantity, 
                                 COALESCE(pm.total_quantity_prev, 0) AS total_quantity_prev
                             FROM factory_list fl
@@ -498,16 +498,46 @@ def get_all_row_order(start_date, end_date):
     try:
         conn = Database.get_connection()
         with conn.cursor() as cur:
-            cur.execute("""SELECT * 
-                        FROM fact_order o join dim_factory f
-                        ON o.factory_code = f.factory_code
-                        WHERE order_date BETWEEN %(start_date)s AND %(end_date)s""",
-                        {'start_date': start_date, 'end_date': end_date})
-            
+            cur.execute("""
+                SELECT 
+                    o.order_date,
+                    o.order_code,
+                    o.ct_date,
+                    o.factory_code,
+                    o.factory_order_code,
+                    o.tax_type,
+                    o.department,
+                    o.salesman,
+                    o.deposit_rate,
+                    o.payment_registration_code,
+                    o.payment_registration_name,
+                    o.delivery_address,
+                    o.product_code,
+                    o.product_name,
+                    o.qc,
+                    o.warehouse_type,
+                    o.order_quantity,
+                    o.delivered_quantity,
+                    o.package_order_quantity,
+                    o.delivered_package_order_quantity,
+                    o.unit,
+                    o.package_unit,
+                    o.estimated_delivery_date,
+                    o.original_estimated_delivery_date,
+                    o.pre_ct,
+                    o.finish_code,
+                    o.import_timestamp,
+                    o.import_wh_timestamp,
+                    f.factory_code,
+                    f.factory_name
+                FROM fact_order o
+                JOIN dim_factory f ON o.factory_code = f.factory_code
+                WHERE o.order_date BETWEEN %(start_date)s AND %(end_date)s
+            """, {'start_date': start_date, 'end_date': end_date})
+
             data = cur.fetchall()
-            column_names = [description[0] for description in cur.description]
-            df = pd.DataFrame(data = data, columns = column_names)
-            df = df.drop(columns=["is_active", "has_onsite"], errors="ignore")
+            column_names = [desc[0] for desc in cur.description]
+            df = pd.DataFrame(data=data, columns=column_names)
             return df
     finally:
         Database.return_connection(conn)
@@ -517,16 +547,37 @@ def get_all_row_sales(start_date, end_date):
     try:
         conn = Database.get_connection()
         with conn.cursor() as cur:
-            cur.execute("""SELECT * 
-                        FROM fact_sales s join dim_factory f
-                        ON s.factory_code = f.factory_code
-                        WHERE sales_date BETWEEN %(start_date)s AND %(end_date)s""",
-                        {'start_date': start_date, 'end_date': end_date})
+            cur.execute("""
+                SELECT
+                    s.product_code,
+                    s.product_name,
+                    s.qc,
+                    s.factory_code,
+                    s.sales_date,
+                    s.sales_code,
+                    s.order_code,
+                    s.sales_quantity,
+                    s.unit,
+                    s.package_sales_quantity,
+                    s.package_unit,
+                    s.department,
+                    s.salesman,
+                    s.warehouse_code,
+                    s.warehouse_type,
+                    s.import_code,
+                    s.factory_order_code,
+                    s.import_timestamp,
+                    s.import_wh_timestamp,
+                    f.factory_code,
+                    f.factory_name
+                FROM fact_sales s
+                JOIN dim_factory f ON s.factory_code = f.factory_code
+                WHERE s.sales_date BETWEEN %(start_date)s AND %(end_date)s
+            """, {'start_date': start_date, 'end_date': end_date})
 
             data = cur.fetchall()
-            column_names = [description[0] for description in cur.description]
-            df = pd.DataFrame(data = data, columns = column_names)
-            df = df.drop(columns=["is_active", "has_onsite"], errors="ignore")
+            column_names = [desc[0] for desc in cur.description]
+            df = pd.DataFrame(data=data, columns=column_names)
             return df
     finally:
         Database.return_connection(conn)

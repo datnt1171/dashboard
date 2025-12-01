@@ -146,7 +146,7 @@ def process_sales_file(file_path: str):
 
     df_new['sales_date'] = pd.to_datetime(df_new['sales_date'], dayfirst=True)
     df_new['first_4_sales_code'] = df_new['sales_code'].str.split("-").str[0]
-    df_new = df_new[df_new['first_4_sales_code'] == '2301']
+    df_new = df_new[df_new['first_4_sales_code'].isin(['2301', '2302'])]
     df_new.dropna(subset='qc', inplace=True)
     df_new.drop(columns=['first_4_sales_code'], inplace=True)
 
